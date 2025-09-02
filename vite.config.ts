@@ -24,7 +24,15 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       // Listening on all local ips
       host: true,
       open: true,
-      port: VITE_PORT
+      port: VITE_PORT,
+      proxy: {
+        '/api': {
+          target: 'https://wctest.mynatapp.cc',
+          changeOrigin: true,
+          secure: true,
+          rewrite: (path) => path.replace(/^\/api/, '')
+        }
+      }
     },
     plugins: [
       react(),

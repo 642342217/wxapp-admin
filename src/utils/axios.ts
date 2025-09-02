@@ -15,6 +15,12 @@ const handleError = (error: AxiosError): Promise<AxiosError> => {
     clearAuthCache()
     location.href = '/login'
   }
+
+  // 处理402状态码，需要验证码
+  if (error.response?.status === 402) {
+    return Promise.reject({ ...error, needCaptcha: true })
+  }
+
   message.error(error.message || 'error')
   return Promise.reject(error)
 }
@@ -23,21 +29,25 @@ const handleError = (error: AxiosError): Promise<AxiosError> => {
 service.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = getToken()
   if (token) {
-    ;(config as Recordable).headers['Authorization'] = `${token}`
+    ; (config as Recordable).headers['Authorization'] = `${token}`
   }
-  ;(config as Recordable).headers['Content-Type'] = 'application/json'
+  ; (config as Recordable).headers['Content-Type'] = 'application/json'
   return config
 }, handleError)
 
 // Respose interceptors configuration
 service.interceptors.response.use((response: AxiosResponse) => {
+  // 如果是blob类型，直接返回response
+  if (response.config.responseType === 'blob') {
+    return response
+  }
+
   const data = response.data
 
   if (data.code === 0) {
     return data.data
   } else {
     message.error(data.message)
-
     return Promise.reject('error')
   }
 }, handleError)

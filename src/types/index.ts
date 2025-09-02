@@ -1,6 +1,8 @@
 export interface LoginParams {
-  username: string
+  account: string
   password: string
+  code?: string
+  codeKey?: string
 }
 
 export interface UserInfo {

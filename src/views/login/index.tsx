@@ -1,13 +1,13 @@
 import type { LoginParams, UserInfo } from '@/types'
 import { type FC, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Form, Input, Checkbox, Button, message } from 'antd'
-import { UserOutlined, LockOutlined } from '@ant-design/icons'
+import { Form, Input, Checkbox, Button, message, Image } from 'antd'
+import { UserOutlined, LockOutlined, SafetyOutlined } from '@ant-design/icons'
 import { useAppSelector, useAppDispatch } from '@/stores'
 import { setToken, setUserInfo, setSessionTimeout } from '@/stores/modules/user'
 import { getAuthCache } from '@/utils/auth'
 import { TOKEN_KEY } from '@/enums/cacheEnum'
-import { loginApi, getUserInfo } from '@/api'
+import { loginApi, getUserInfo, getCaptcha } from '@/api'
 import logoIcon from '@/assets/images/logo_name.png'
 import classNames from 'classnames'
 import styles from './index.module.less'
@@ -15,6 +15,9 @@ import styles from './index.module.less'
 const LoginPage: FC = () => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
+  const [showCaptcha, setShowCaptcha] = useState(false)
+  const [captchaImage, setCaptchaImage] = useState('')
+  const [captchaKey, setCaptchaKey] = useState('')
 
   const dispatch = useAppDispatch()
 
@@ -26,18 +29,44 @@ const LoginPage: FC = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
+  // 获取验证码
+  const fetchCaptcha = async () => {
+    try {
+      const captchaData = await getCaptcha()
+      setCaptchaImage(captchaData.imageUrl)
+      setCaptchaKey(captchaData.captchaKey)
+      setShowCaptcha(true)
+    } catch (error) {
+      message.error('获取验证码失败')
+    }
+  }
+
   const handleLogin = async (values: any) => {
     try {
       setLoading(true)
-      const userInfo = await loginAction({
-        username: values.username,
+      const loginParams: any = {
+        account: values.account,
         password: values.password
-      })
+      }
+
+      // 如果显示验证码，则添加验证码参数
+      if (showCaptcha) {
+        loginParams.code = values.code
+        loginParams.codeKey = captchaKey
+      }
+
+      const userInfo = await loginAction(loginParams)
       if (userInfo) {
         message.success('登陆成功！')
       }
-    } catch (error) {
-      message.error((error as unknown as Error).message)
+    } catch (error: any) {
+      // 检查是否需要验证码
+      if (error.needCaptcha) {
+        await fetchCaptcha()
+        message.warning('请输入验证码')
+      } else {
+        message.error((error as unknown as Error).message)
+      }
     } finally {
       setLoading(false)
     }
@@ -99,14 +128,14 @@ const LoginPage: FC = () => {
         <Form
           form={form}
           initialValues={{
-            username: 'admin',
-            password: '123456',
+            account: 'admin',
+            password: '654321',
             remember: true
           }}
           className={styles['login-box-form']}
           onFinish={handleLogin}
         >
-          <Form.Item name='username' rules={[{ required: true, message: '请输入账号' }]}>
+          <Form.Item name='account' rules={[{ required: true, message: '请输入账号' }]}>
             <Input
               placeholder='请输入账号'
               prefix={<UserOutlined style={{ color: 'rgba(0, 0, 0, 0.25)' }} rev={undefined} />}
@@ -119,14 +148,30 @@ const LoginPage: FC = () => {
               prefix={<LockOutlined style={{ color: 'rgba(0, 0, 0, 0.25)' }} rev={undefined} />}
             />
           </Form.Item>
-          <Form.Item>
-            <Form.Item name='remember' className={classNames('fl', styles['no-margin'])} valuePropName='checked'>
-              <Checkbox>记住我</Checkbox>
-            </Form.Item>
-            <Form.Item className={classNames('fr', styles['no-margin'])}>
-              <a href=''>忘记密码？</a>
-            </Form.Item>
-          </Form.Item>
+
+          {showCaptcha && (
+            <>
+              <Form.Item name='code' rules={[{ required: true, message: '请输入验证码' }]}>
+                <Input
+                  placeholder='请输入验证码'
+                  prefix={<SafetyOutlined style={{ color: 'rgba(0, 0, 0, 0.25)' }} rev={undefined} />}
+                  suffix={
+                    <div style={{ cursor: 'pointer' }} onClick={fetchCaptcha}>
+                      <Image
+                        src={captchaImage}
+                        alt="验证码"
+                        width={80}
+                        height={32}
+                        preview={false}
+                        style={{ borderRadius: '4px' }}
+                      />
+                    </div>
+                  }
+                />
+              </Form.Item>
+            </>
+          )}
+
           <Form.Item>
             <Button type='primary' htmlType='submit' className={styles['login-btn']} loading={loading}>
               登 录

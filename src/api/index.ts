@@ -1,14 +1,40 @@
 import { service } from '@/utils/axios'
 
 interface LoginParams {
-  username: string
+  account: string
   password: string
+  code?: string
+  codeKey?: string
+}
+
+// Get captcha api
+export function getCaptcha(params = {}): Promise<any> {
+  const queryString = new URLSearchParams(params).toString();
+  const url = queryString ? `/common/captcha/get?${queryString}` : '/common/captcha/get';
+
+  return service({
+    url,
+    method: 'get',
+    responseType: 'blob'
+  }).then(response => {
+    // 获取响应头中的captchaKey
+    const captchaKey = response.headers?.['captchakey'] || response.headers?.['captchaKey'];
+
+    // 创建图片URL
+    const imageUrl = URL.createObjectURL(response.data);
+
+    return {
+      captchaKey,
+      imageUrl,
+      imageBlob: response.data
+    };
+  });
 }
 
 // User login api
 export function loginApi(data: LoginParams): Promise<any> {
   return service({
-    url: '/login',
+    url: '/auth/admin/login',
     method: 'post',
     data
   })
