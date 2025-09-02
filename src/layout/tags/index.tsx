@@ -223,25 +223,25 @@ const LayoutTags: FC = () => {
         disabled={!canMove}
         onClick={() => handleMove(-200)}
       />
-      <Button
+      {/* <Button
         className={classNames(styles['layout_tags__btn'], styles['layout_tags__btn-space'])}
         icon={isFullscreen ? <CompressOutlined /> : <ExpandOutlined />}
         size='small'
         onClick={() => toggleFullscreen()}
-      />
-      <Button
+      /> */}
+      {/* <Button
         className={classNames(`${styles.layout_tags}__btn`, `${styles.layout_tags}__btn-space`)}
         icon={<RedoOutlined />}
         size='small'
         onClick={() => handleReload()}
-      />
-      <Dropdown menu={{ items, onClick }} placement='bottomLeft'>
+      /> */}
+      {/* <Dropdown menu={{ items, onClick }} placement='bottomLeft'>
         <Button
           className={classNames(styles['layout_tags__btn'], styles['layout_tags__btn-space'])}
           icon={<CloseOutlined />}
           size='small'
         />
-      </Dropdown>
+      </Dropdown> */}
     </div>
   )
 }

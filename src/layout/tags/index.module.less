@@ -1,7 +1,7 @@
 .layout_tags {
   z-index: 299;
   display: flex;
-  justify-content: space-between;
+  align-items: center;
   height: 32px;
   padding: 4px 12px;
   line-height: 32px;
@@ -11,8 +11,9 @@
 
   &__main {
     position: relative;
-    width: calc(100% - 116px);
+    flex: 1;
     height: 24px;
+    margin: 0 8px;
     overflow: hidden;
 
     &-cont {
