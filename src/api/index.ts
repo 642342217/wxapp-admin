@@ -46,10 +46,19 @@ export function getUserInfo(): Promise<any> {
   })
 }
 
+// Change password api
+export function changePasswordApi(data: { oldPassword: string; newPassword: string }): Promise<any> {
+  return service({
+    url: '/auth/admin/changePassword',
+    method: 'post',
+    data
+  })
+}
+
 // User logout api
 export function logoutApi() {
   return service({
-    url: '/logout',
+    url: '/auth/admin/logout',
     method: 'post'
   })
 }

@@ -21,7 +21,8 @@ const user = createSlice({
     setUserInfo: (state, action) => {
       state.userInfo = action.payload
       state.lastUpdateTime = new Date().getTime()
-      setAuthCache(USER_INFO_KEY, action.payload)
+      // 移除localStorage缓存，只存储在全局状态中
+      // setAuthCache(USER_INFO_KEY, action.payload)
     },
     setSessionTimeout: (state, action) => {
       state.sessionTimeout = action.payload

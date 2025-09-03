@@ -86,40 +86,20 @@ const LoginPage: FC = () => {
   const afterLoginAction = async (goHome?: boolean): Promise<UserInfo | null> => {
     if (!getToken()) return null
 
-    try {
-      const userInfo = await getUserInfoAction()
-
-      if (sessionTimeout) {
-        dispatch(setSessionTimeout(false))
+    // 移除获取用户信息的调用，由GuardRoute负责
+    if (sessionTimeout) {
+      dispatch(setSessionTimeout(false))
+    } else {
+      const redirect = searchParams.get('redirect')
+      if (redirect) {
+        navigate(redirect)
       } else {
-        const redirect = searchParams.get('redirect')
-        if (redirect) {
-          navigate(redirect)
-        } else {
-          // 确保登录成功后跳转到首页
-          goHome && navigate(userInfo?.homePath || '/home')
-        }
+        // 登录成功后直接跳转到首页
+        goHome && navigate('/home')
       }
-
-      return userInfo
-    } catch (error) {
-      // 即使获取用户信息失败，也要跳转到首页
-      console.error('获取用户信息失败:', error)
-      if (goHome) {
-        navigate('/home')
-      }
-      return null
     }
-  }
 
-  const getUserInfoAction = async (): Promise<UserInfo | null> => {
-    if (!getToken()) return null
-
-    const userInfo = await getUserInfo()
-
-    dispatch(setUserInfo(userInfo))
-
-    return userInfo
+    return null
   }
 
   return (
