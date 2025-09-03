@@ -83,7 +83,7 @@ export function getUserList(params: any): Promise<any> {
 
 export function updateUserStatus(data: { id: number; status: number }): Promise<any> {
   return service({
-    url: '/admin/user/updateStatus',
+    url: '/admin/user/status',
     method: 'post',
     data
   })
@@ -105,9 +105,9 @@ export function updateUser(data: any): Promise<any> {
   })
 }
 
-export function updateUserRemark(data: { id: number; remark: string }): Promise<any> {
+export function updateUserRemark(data: { id: number; remarks: string }): Promise<any> {
   return service({
-    url: '/admin/user/updateRemark',
+    url: '/admin/user/remarks',
     method: 'post',
     data
   })

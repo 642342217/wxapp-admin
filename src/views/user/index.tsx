@@ -16,7 +16,7 @@ import {
 } from 'antd'
 import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { PageWrapper } from '@/components/Page'
-import { getUserList, updateUserStatus, addUser, updateUser } from '@/api'
+import { getUserList, updateUserStatus, addUser, updateUser, updateUserRemark } from '@/api'
 import type { UserDataType, UserPageParams, UserPageResult } from './types'
 
 const UserManagement: FC = () => {
@@ -171,7 +171,7 @@ const UserManagement: FC = () => {
   function handleRemark(record: UserDataType) {
     setCurrentRecord(record)
     setRemarkModalVisible(true)
-    editForm.setFieldsValue({ remark: record.remark || '' })
+    editForm.setFieldsValue({ remarks: record.remark || '' })
   }
 
   function handleStatusChange(record: UserDataType) {
@@ -227,7 +227,10 @@ const UserManagement: FC = () => {
       } else if (remarkModalVisible) {
         // 更新备注
         const values = await editForm.validateFields()
-        // TODO: 调用更新备注API
+        await updateUserRemark({
+          id: currentRecord?.id!,
+          remarks: values.remarks
+        })
         message.success('更新备注成功')
         setRemarkModalVisible(false)
         fetchData()
@@ -367,7 +370,7 @@ const UserManagement: FC = () => {
         cancelText="取消"
       >
         <Form form={editForm} layout="vertical">
-          <Form.Item name="remark" label="备注">
+          <Form.Item name="remarks" label="备注">
             <Input.TextArea rows={4} placeholder="请输入备注信息" />
           </Form.Item>
         </Form>
