@@ -29,7 +29,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
         '/api': {
           target: 'https://wctest.mynatapp.cc',
           changeOrigin: true,
-          secure: true,
+          secure: false,
           rewrite: (path) => path.replace(/^\/api/, '')
         }
       }

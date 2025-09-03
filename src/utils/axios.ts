@@ -28,10 +28,10 @@ const handleError = (error: AxiosError): Promise<AxiosError> => {
 // Request interceptors configuration
 service.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = getToken()
-  if (token) {
-    ; (config as Recordable).headers['Authorization'] = `${token}`
+  if (token && typeof token === 'string' && token.trim()) {
+    (config as Recordable).headers['Authorization'] = token.trim()
   }
-  ; (config as Recordable).headers['Content-Type'] = 'application/json'
+  (config as Recordable).headers['Content-Type'] = 'application/json'
   return config
 }, handleError)
 
@@ -47,8 +47,8 @@ service.interceptors.response.use((response: AxiosResponse) => {
   if (data.code === 0) {
     return data.data
   } else {
-    message.error(data.message)
-    return Promise.reject('error')
+    // 移除message.error，让上层处理错误显示
+    return Promise.reject(new Error(data.msg || data.message || 'error'))
   }
 }, handleError)
 

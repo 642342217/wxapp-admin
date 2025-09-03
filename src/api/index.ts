@@ -9,12 +9,10 @@ interface LoginParams {
 
 // Get captcha api
 export function getCaptcha(params = {}): Promise<any> {
-  const queryString = new URLSearchParams(params).toString();
-  const url = queryString ? `/common/captcha/get?${queryString}` : '/common/captcha/get';
-
   return service({
-    url,
-    method: 'get',
+    url: '/common/captcha/get',
+    method: 'post',
+    data: params,
     responseType: 'blob'
   }).then(response => {
     // 获取响应头中的captchaKey
@@ -43,8 +41,8 @@ export function loginApi(data: LoginParams): Promise<any> {
 // Get User info
 export function getUserInfo(): Promise<any> {
   return service({
-    url: '/getUserInfo',
-    method: 'get'
+    url: '/auth/admin/info',
+    method: 'post'
   })
 }
 
@@ -52,7 +50,7 @@ export function getUserInfo(): Promise<any> {
 export function logoutApi() {
   return service({
     url: '/logout',
-    method: 'get'
+    method: 'post'
   })
 }
 
@@ -60,7 +58,7 @@ export function logoutApi() {
 export function getTableList(params: any) {
   return service({
     url: '/table/getTableList',
-    method: 'get',
-    params
+    method: 'post',
+    data: params
   })
 }

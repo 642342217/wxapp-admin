@@ -1,5 +1,5 @@
 import type { LoginParams, UserInfo } from '@/types'
-import { type FC, useState } from 'react'
+import { type FC, useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Form, Input, Checkbox, Button, message, Image } from 'antd'
 import { UserOutlined, LockOutlined, SafetyOutlined } from '@ant-design/icons'
@@ -15,7 +15,6 @@ import styles from './index.module.less'
 const LoginPage: FC = () => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
-  const [showCaptcha, setShowCaptcha] = useState(false)
   const [captchaImage, setCaptchaImage] = useState('')
   const [captchaKey, setCaptchaKey] = useState('')
 
@@ -35,24 +34,24 @@ const LoginPage: FC = () => {
       const captchaData = await getCaptcha()
       setCaptchaImage(captchaData.imageUrl)
       setCaptchaKey(captchaData.captchaKey)
-      setShowCaptcha(true)
     } catch (error) {
       message.error('获取验证码失败')
     }
   }
 
+  // 组件加载时获取验证码
+  useEffect(() => {
+    fetchCaptcha()
+  }, [])
+
   const handleLogin = async (values: any) => {
     try {
       setLoading(true)
-      const loginParams: any = {
+      const loginParams: LoginParams = {
         account: values.account,
-        password: values.password
-      }
-
-      // 如果显示验证码，则添加验证码参数
-      if (showCaptcha) {
-        loginParams.code = values.code
-        loginParams.codeKey = captchaKey
+        password: values.password,
+        code: values.code,
+        codeKey: captchaKey
       }
 
       const userInfo = await loginAction(loginParams)
@@ -60,13 +59,8 @@ const LoginPage: FC = () => {
         message.success('登陆成功！')
       }
     } catch (error: any) {
-      // 检查是否需要验证码
-      if (error.needCaptcha) {
-        await fetchCaptcha()
-        message.warning('请输入验证码')
-      } else {
-        message.error((error as unknown as Error).message)
-      }
+      // 登录失败时只显示错误信息，不重新获取验证码
+      message.error(error?.message || '登录失败')
     } finally {
       setLoading(false)
     }
@@ -79,10 +73,10 @@ const LoginPage: FC = () => {
   ): Promise<UserInfo | null> => {
     try {
       const { goHome = true, ...loginParams } = params
-      const data = await loginApi(loginParams)
+      const token = await loginApi(loginParams)
 
-      // 保存 Token
-      dispatch(setToken(data?.token))
+      // 保存 Token (后端返回的data字段就是token)
+      dispatch(setToken(token))
       return afterLoginAction(goHome)
     } catch (error) {
       return Promise.reject(error)
@@ -92,20 +86,30 @@ const LoginPage: FC = () => {
   const afterLoginAction = async (goHome?: boolean): Promise<UserInfo | null> => {
     if (!getToken()) return null
 
-    const userInfo = await getUserInfoAction()
+    try {
+      const userInfo = await getUserInfoAction()
 
-    if (sessionTimeout) {
-      dispatch(setSessionTimeout(false))
-    } else {
-      const redirect = searchParams.get('redirect')
-      if (redirect) {
-        navigate(redirect)
+      if (sessionTimeout) {
+        dispatch(setSessionTimeout(false))
       } else {
-        goHome && navigate(userInfo?.homePath || '/home')
+        const redirect = searchParams.get('redirect')
+        if (redirect) {
+          navigate(redirect)
+        } else {
+          // 确保登录成功后跳转到首页
+          goHome && navigate(userInfo?.homePath || '/home')
+        }
       }
-    }
 
-    return userInfo
+      return userInfo
+    } catch (error) {
+      // 即使获取用户信息失败，也要跳转到首页
+      console.error('获取用户信息失败:', error)
+      if (goHome) {
+        navigate('/home')
+      }
+      return null
+    }
   }
 
   const getUserInfoAction = async (): Promise<UserInfo | null> => {
@@ -149,28 +153,24 @@ const LoginPage: FC = () => {
             />
           </Form.Item>
 
-          {showCaptcha && (
-            <>
-              <Form.Item name='code' rules={[{ required: true, message: '请输入验证码' }]}>
-                <Input
-                  placeholder='请输入验证码'
-                  prefix={<SafetyOutlined style={{ color: 'rgba(0, 0, 0, 0.25)' }} rev={undefined} />}
-                  suffix={
-                    <div style={{ cursor: 'pointer' }} onClick={fetchCaptcha}>
-                      <Image
-                        src={captchaImage}
-                        alt="验证码"
-                        width={80}
-                        height={32}
-                        preview={false}
-                        style={{ borderRadius: '4px' }}
-                      />
-                    </div>
-                  }
-                />
-              </Form.Item>
-            </>
-          )}
+          <Form.Item name='code' rules={[{ required: true, message: '请输入验证码' }]}>
+            <Input
+              placeholder='请输入验证码'
+              prefix={<SafetyOutlined style={{ color: 'rgba(0, 0, 0, 0.25)' }} rev={undefined} />}
+              suffix={
+                <div style={{ cursor: 'pointer' }} onClick={fetchCaptcha}>
+                  <Image
+                    src={captchaImage}
+                    alt="验证码"
+                    width={80}
+                    height={32}
+                    preview={false}
+                    style={{ borderRadius: '4px' }}
+                  />
+                </div>
+              }
+            />
+          </Form.Item>
 
           <Form.Item>
             <Button type='primary' htmlType='submit' className={styles['login-btn']} loading={loading}>
