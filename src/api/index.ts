@@ -71,3 +71,44 @@ export function getTableList(params: any) {
     data: params
   })
 }
+
+// User management APIs
+export function getUserList(params: any): Promise<any> {
+  return service({
+    url: '/admin/user/page',
+    method: 'post',
+    data: params
+  })
+}
+
+export function updateUserStatus(data: { id: number; status: number }): Promise<any> {
+  return service({
+    url: '/admin/user/updateStatus',
+    method: 'post',
+    data
+  })
+}
+
+export function addUser(data: any): Promise<any> {
+  return service({
+    url: '/admin/user/add',
+    method: 'post',
+    data
+  })
+}
+
+export function updateUser(data: any): Promise<any> {
+  return service({
+    url: '/admin/user/update',
+    method: 'post',
+    data
+  })
+}
+
+export function updateUserRemark(data: { id: number; remark: string }): Promise<any> {
+  return service({
+    url: '/admin/user/updateRemark',
+    method: 'post',
+    data
+  })
+}
