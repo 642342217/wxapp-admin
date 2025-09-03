@@ -5,16 +5,13 @@ import {
   Card,
   Button,
   Table,
-  Tag,
   Space,
   Modal,
   Form,
   Input,
-  Select,
   Row,
   Col,
   message,
-  InputNumber,
   Breadcrumb
 } from 'antd'
 import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, ArrowLeftOutlined } from '@ant-design/icons'
@@ -33,7 +30,7 @@ const AccountManagement: FC = () => {
 
   const [searchParams, setSearchParams] = useState<AccountPageParams>({
     userId: Number(userId),
-    accountName: '',
+    account: '',
     pageSize: 10,
     pageNum: 1
   })
@@ -41,13 +38,6 @@ const AccountManagement: FC = () => {
   const [editModalVisible, setEditModalVisible] = useState(false)
   const [addModalVisible, setAddModalVisible] = useState(false)
   const [currentRecord, setCurrentRecord] = useState<AccountDataType | null>(null)
-
-  const accountTypes = [
-    { label: '储蓄账户', value: 'savings' },
-    { label: '支票账户', value: 'checking' },
-    { label: '信用账户', value: 'credit' },
-    { label: '投资账户', value: 'investment' }
-  ]
 
   const columns: ColumnsType<AccountDataType> = [
     {
@@ -57,38 +47,17 @@ const AccountManagement: FC = () => {
       width: 80
     },
     {
-      title: '账户名称',
-      dataIndex: 'accountName',
+      title: '账户名',
+      dataIndex: 'account',
       align: 'center',
-      width: 150
+      width: 200
     },
     {
-      title: '账户类型',
-      dataIndex: 'accountType',
+      title: '密码',
+      dataIndex: 'password',
       align: 'center',
-      width: 120,
-      render: (type: string) => {
-        const typeObj = accountTypes.find(item => item.value === type)
-        return typeObj ? typeObj.label : type
-      }
-    },
-    {
-      title: '余额',
-      dataIndex: 'balance',
-      align: 'center',
-      width: 120,
-      render: (balance: number) => `¥${balance.toFixed(2)}`
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      align: 'center',
-      width: 100,
-      render: (status: number) => (
-        <Tag color={status === 1 ? 'green' : 'red'}>
-          {status === 1 ? '正常' : '冻结'}
-        </Tag>
-      )
+      width: 200,
+      render: (password: string) => '••••••••'
     },
     {
       title: '创建时间',
@@ -96,13 +65,6 @@ const AccountManagement: FC = () => {
       align: 'center',
       width: 180,
       render: (time: string) => new Date(time).toLocaleString()
-    },
-    {
-      title: '备注',
-      dataIndex: 'remark',
-      align: 'center',
-      width: 150,
-      render: (remark: string) => remark || '-'
     },
     {
       title: '操作',
@@ -144,7 +106,7 @@ const AccountManagement: FC = () => {
     const values = searchForm.getFieldsValue()
     setSearchParams({
       ...searchParams,
-      accountName: values.accountName || '',
+      account: values.account || '',
       pageNum: 1
     })
   }
@@ -153,7 +115,7 @@ const AccountManagement: FC = () => {
     searchForm.resetFields()
     setSearchParams({
       ...searchParams,
-      accountName: '',
+      account: '',
       pageNum: 1
     })
   }
@@ -174,13 +136,16 @@ const AccountManagement: FC = () => {
   function handleEdit(record: AccountDataType) {
     setCurrentRecord(record)
     setEditModalVisible(true)
-    editForm.setFieldsValue(record)
+    editForm.setFieldsValue({
+      account: record.account,
+      password: ''
+    })
   }
 
   function handleDelete(record: AccountDataType) {
     Modal.confirm({
       title: '确认删除',
-      content: `确定要删除账户"${record.accountName}"吗？`,
+      content: `确定要删除账户"${record.account}"吗？`,
       icon: <ExclamationCircleOutlined />,
       okText: '确定',
       cancelText: '取消',
@@ -203,10 +168,8 @@ const AccountManagement: FC = () => {
         const values = await editForm.validateFields()
         await addAccount({
           userId: Number(userId),
-          accountName: values.accountName,
-          accountType: values.accountType,
-          balance: values.balance,
-          remark: values.remark
+          account: values.account,
+          password: values.password
         })
         message.success('新增账户成功')
         setAddModalVisible(false)
@@ -217,10 +180,8 @@ const AccountManagement: FC = () => {
         const values = await editForm.validateFields()
         await updateAccount({
           id: currentRecord?.id!,
-          accountName: values.accountName,
-          accountType: values.accountType,
-          balance: values.balance,
-          remark: values.remark
+          account: values.account,
+          password: values.password
         })
         message.success('编辑账户成功')
         setEditModalVisible(false)
@@ -247,12 +208,30 @@ const AccountManagement: FC = () => {
 
   return (
     <PageWrapper>
+      {/* 面包屑导航 */}
+      <Card bordered={false} style={{ marginBottom: 16 }}>
+        <Row align="middle" justify="space-between">
+          <Col>
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Button type="link" onClick={handleBack} icon={<ArrowLeftOutlined />}>
+                  用户管理
+                </Button>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>账户管理</Breadcrumb.Item>
+            </Breadcrumb>
+          </Col>
+          <Col>
+            <span>用户ID: {userId}</span>
+          </Col>
+        </Row>
+      </Card>
 
       {/* 搜索区域 */}
       <Card bordered={false} style={{ marginBottom: 16 }}>
         <Form form={searchForm} layout="inline">
-          <Form.Item name="accountName" label="账户名称">
-            <Input placeholder="请输入账户名称" style={{ width: 200 }} />
+          <Form.Item name="account" label="账户名">
+            <Input placeholder="请输入账户名" style={{ width: 200 }} />
           </Form.Item>
           <Form.Item>
             <Space>
@@ -303,47 +282,30 @@ const AccountManagement: FC = () => {
         open={editModalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
-        width={600}
+        width={500}
         okText="确定"
         cancelText="取消"
       >
         <Form form={editForm} layout="vertical">
           <Form.Item
-            name="accountName"
-            label="账户名称"
+            name="account"
+            label="账户名"
             rules={[
-              { required: true, message: '请输入账户名称' },
-              { min: 2, max: 50, message: '账户名称长度应在2-50个字符之间' }
+              { required: true, message: '请输入账户名' },
+              { min: 3, max: 20, message: '账户名长度应在3-20个字符之间' }
             ]}
           >
-            <Input placeholder="请输入账户名称" />
+            <Input placeholder="请输入账户名" />
           </Form.Item>
           <Form.Item
-            name="accountType"
-            label="账户类型"
-            rules={[{ required: true, message: '请选择账户类型' }]}
-          >
-            <Select placeholder="请选择账户类型" options={accountTypes} />
-          </Form.Item>
-          <Form.Item
-            name="balance"
-            label="余额"
+            name="password"
+            label="密码"
             rules={[
-              { required: true, message: '请输入余额' },
-              { type: 'number', min: 0, message: '余额不能为负数' }
+              { required: true, message: '请输入密码' },
+              { min: 6, max: 20, message: '密码长度应在6-20个字符之间' }
             ]}
           >
-            <InputNumber
-              style={{ width: '100%' }}
-              placeholder="请输入余额"
-              precision={2}
-              min={0}
-              formatter={(value) => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={(value) => value!.replace(/¥\s?|(,*)/g, '')}
-            />
-          </Form.Item>
-          <Form.Item name="remark" label="备注">
-            <Input.TextArea rows={3} placeholder="请输入备注信息" />
+            <Input.Password placeholder="请输入密码" />
           </Form.Item>
         </Form>
       </Modal>
@@ -354,47 +316,30 @@ const AccountManagement: FC = () => {
         open={addModalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
-        width={600}
+        width={500}
         okText="确定"
         cancelText="取消"
       >
         <Form form={editForm} layout="vertical">
           <Form.Item
-            name="accountName"
-            label="账户名称"
+            name="account"
+            label="账户名"
             rules={[
-              { required: true, message: '请输入账户名称' },
-              { min: 2, max: 50, message: '账户名称长度应在2-50个字符之间' }
+              { required: true, message: '请输入账户名' },
+              { min: 3, max: 20, message: '账户名长度应在3-20个字符之间' }
             ]}
           >
-            <Input placeholder="请输入账户名称" />
+            <Input placeholder="请输入账户名" />
           </Form.Item>
           <Form.Item
-            name="accountType"
-            label="账户类型"
-            rules={[{ required: true, message: '请选择账户类型' }]}
-          >
-            <Select placeholder="请选择账户类型" options={accountTypes} />
-          </Form.Item>
-          <Form.Item
-            name="balance"
-            label="初始余额"
+            name="password"
+            label="密码"
             rules={[
-              { required: true, message: '请输入初始余额' },
-              { type: 'number', min: 0, message: '余额不能为负数' }
+              { required: true, message: '请输入密码' },
+              { min: 6, max: 20, message: '密码长度应在6-20个字符之间' }
             ]}
           >
-            <InputNumber
-              style={{ width: '100%' }}
-              placeholder="请输入初始余额"
-              precision={2}
-              min={0}
-              formatter={(value) => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={(value) => value!.replace(/¥\s?|(,*)/g, '')}
-            />
-          </Form.Item>
-          <Form.Item name="remark" label="备注">
-            <Input.TextArea rows={3} placeholder="请输入备注信息" />
+            <Input.Password placeholder="请输入密码" />
           </Form.Item>
         </Form>
       </Modal>

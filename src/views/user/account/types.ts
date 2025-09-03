@@ -1,17 +1,14 @@
 export interface AccountDataType {
   id: number
   userId: number
-  accountName: string
-  accountType: string
-  balance: number
-  status: number
+  account: string
+  password: string
   createTime: string
-  remark?: string
 }
 
 export interface AccountPageParams {
   userId: number
-  accountName?: string
+  account?: string
   pageSize: number
   pageNum: number
 }
@@ -26,16 +23,12 @@ export interface AccountPageResult {
 
 export interface AddAccountParams {
   userId: number
-  accountName: string
-  accountType: string
-  balance: number
-  remark?: string
+  account: string
+  password: string
 }
 
 export interface UpdateAccountParams {
   id: number
-  accountName: string
-  accountType: string
-  balance: number
-  remark?: string
+  account: string
+  password: string
 }

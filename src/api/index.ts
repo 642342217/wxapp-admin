@@ -116,7 +116,7 @@ export function updateUserRemark(data: { id: number; remarks: string }): Promise
 // Account management APIs
 export function getAccountList(params: any): Promise<any> {
   return service({
-    url: '/admin/account/page',
+    url: '/admin/user/auth/page',
     method: 'post',
     data: params
   })
