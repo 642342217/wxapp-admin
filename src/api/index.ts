@@ -11,7 +11,7 @@ interface LoginParams {
 export function getCaptcha(params = {}): Promise<any> {
   return service({
     url: '/common/captcha/get',
-    method: 'post',
+    method: 'get',
     data: params,
     responseType: 'blob'
   }).then(response => {

@@ -61,6 +61,8 @@ export default function ChangePasswordModal({ open, onCancel }: ChangePasswordMo
       onCancel={handleCancel}
       confirmLoading={loading}
       destroyOnClose
+      okText="确定"
+      cancelText="取消"
     >
       <Form
         form={form}
