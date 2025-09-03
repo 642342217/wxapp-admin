@@ -1,4 +1,6 @@
 import { RouterProvider } from 'react-router-dom'
+import { ConfigProvider } from 'antd'
+import zhCN from 'antd/locale/zh_CN'
 import router from '@/router'
 import { setupProdMockServer } from '../mock/_createProductionServer'
 
@@ -8,7 +10,11 @@ function App() {
     setupProdMockServer()
   }
 
-  return <RouterProvider router={router} />
+  return (
+    <ConfigProvider locale={zhCN}>
+      <RouterProvider router={router} />
+    </ConfigProvider>
+  )
 }
 
 export default App

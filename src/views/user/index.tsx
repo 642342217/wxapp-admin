@@ -182,6 +182,8 @@ const UserManagement: FC = () => {
       title: `确认${action}`,
       content: `确定要${action}用户"${record.name}"吗？`,
       icon: <ExclamationCircleOutlined />,
+      okText: '确定',
+      cancelText: '取消',
       onOk: async () => {
         try {
           await updateUserStatus({ id: record.id, status: newStatus })
@@ -212,9 +214,9 @@ const UserManagement: FC = () => {
 
   return (
     <PageWrapper>
-      <Card bordered={false}>
-        {/* 搜索区域 */}
-        <Form form={searchForm} layout="inline" style={{ marginBottom: 16 }}>
+      {/* 搜索区域 */}
+      <Card bordered={false} style={{ marginBottom: 16 }}>
+        <Form form={searchForm} layout="inline">
           <Form.Item name="name" label="用户姓名">
             <Input placeholder="请输入用户姓名" style={{ width: 200 }} />
           </Form.Item>
@@ -229,7 +231,10 @@ const UserManagement: FC = () => {
             </Space>
           </Form.Item>
         </Form>
+      </Card>
 
+      {/* 内容区域 */}
+      <Card bordered={false}>
         {/* 操作按钮区域 */}
         <Row style={{ marginBottom: 16 }}>
           <Col>
@@ -253,79 +258,88 @@ const UserManagement: FC = () => {
             showSizeChanger: true,
             showQuickJumper: true,
             onChange: handlePageChange,
-            pageSizeOptions: ['10', '20', '50', '100']
+            pageSizeOptions: ['10', '20', '50', '100'],
+            showSizeChangerLabel: (size, range) => `每页 ${size} 条`,
+            jumpPrevIcon: '上一页',
+            jumpNextIcon: '下一页'
           }}
         />
-
-        {/* 编辑用户模态框 */}
-        <Modal
-          title="编辑用户"
-          open={editModalVisible}
-          onOk={handleModalOk}
-          onCancel={handleModalCancel}
-          width={600}
-        >
-          <Form form={editForm} layout="vertical">
-            <Form.Item name="name" label="姓名" rules={[{ required: true, message: '请输入姓名' }]}>
-              <Input />
-            </Form.Item>
-            <Form.Item name="gender" label="性别" rules={[{ required: true, message: '请选择性别' }]}>
-              <Select>
-                <Select.Option value={1}>男</Select.Option>
-                <Select.Option value={0}>女</Select.Option>
-              </Select>
-            </Form.Item>
-            <Form.Item name="age" label="年龄" rules={[{ required: true, message: '请输入年龄' }]}>
-              <Input type="number" />
-            </Form.Item>
-            <Form.Item name="telephone" label="电话" rules={[{ required: true, message: '请输入电话' }]}>
-              <Input />
-            </Form.Item>
-          </Form>
-        </Modal>
-
-        {/* 备注模态框 */}
-        <Modal
-          title="用户备注"
-          open={remarkModalVisible}
-          onOk={handleModalOk}
-          onCancel={handleModalCancel}
-          width={500}
-        >
-          <Form form={editForm} layout="vertical">
-            <Form.Item name="remark" label="备注">
-              <Input.TextArea rows={4} placeholder="请输入备注信息" />
-            </Form.Item>
-          </Form>
-        </Modal>
-
-        {/* 新增用户模态框 */}
-        <Modal
-          title="新增用户"
-          open={addModalVisible}
-          onOk={handleModalOk}
-          onCancel={handleModalCancel}
-          width={600}
-        >
-          <Form form={editForm} layout="vertical">
-            <Form.Item name="name" label="姓名" rules={[{ required: true, message: '请输入姓名' }]}>
-              <Input />
-            </Form.Item>
-            <Form.Item name="gender" label="性别" rules={[{ required: true, message: '请选择性别' }]}>
-              <Select placeholder="请选择性别">
-                <Select.Option value={1}>男</Select.Option>
-                <Select.Option value={0}>女</Select.Option>
-              </Select>
-            </Form.Item>
-            <Form.Item name="age" label="年龄" rules={[{ required: true, message: '请输入年龄' }]}>
-              <Input type="number" />
-            </Form.Item>
-            <Form.Item name="telephone" label="电话" rules={[{ required: true, message: '请输入电话' }]}>
-              <Input />
-            </Form.Item>
-          </Form>
-        </Modal>
       </Card>
+
+      {/* 编辑用户模态框 */}
+      <Modal
+        title="编辑用户"
+        open={editModalVisible}
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+        width={600}
+        okText="确定"
+        cancelText="取消"
+      >
+        <Form form={editForm} layout="vertical">
+          <Form.Item name="name" label="姓名" rules={[{ required: true, message: '请输入姓名' }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="gender" label="性别" rules={[{ required: true, message: '请选择性别' }]}>
+            <Select>
+              <Select.Option value={1}>男</Select.Option>
+              <Select.Option value={0}>女</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="age" label="年龄" rules={[{ required: true, message: '请输入年龄' }]}>
+            <Input type="number" />
+          </Form.Item>
+          <Form.Item name="telephone" label="电话" rules={[{ required: true, message: '请输入电话' }]}>
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 备注模态框 */}
+      <Modal
+        title="用户备注"
+        open={remarkModalVisible}
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+        width={500}
+        okText="确定"
+        cancelText="取消"
+      >
+        <Form form={editForm} layout="vertical">
+          <Form.Item name="remark" label="备注">
+            <Input.TextArea rows={4} placeholder="请输入备注信息" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 新增用户模态框 */}
+      <Modal
+        title="新增用户"
+        open={addModalVisible}
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+        width={600}
+        okText="确定"
+        cancelText="取消"
+      >
+        <Form form={editForm} layout="vertical">
+          <Form.Item name="name" label="姓名" rules={[{ required: true, message: '请输入姓名' }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="gender" label="性别" rules={[{ required: true, message: '请选择性别' }]}>
+            <Select placeholder="请选择性别">
+              <Select.Option value={1}>男</Select.Option>
+              <Select.Option value={0}>女</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="age" label="年龄" rules={[{ required: true, message: '请输入年龄' }]}>
+            <Input type="number" />
+          </Form.Item>
+          <Form.Item name="telephone" label="电话" rules={[{ required: true, message: '请输入电话' }]}>
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
     </PageWrapper>
   )
 }
