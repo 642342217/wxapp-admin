@@ -16,7 +16,7 @@ import {
 } from 'antd'
 import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { PageWrapper } from '@/components/Page'
-import { getUserList, updateUserStatus } from '@/api'
+import { getUserList, updateUserStatus, addUser, updateUser } from '@/api'
 import type { UserDataType, UserPageParams, UserPageResult } from './types'
 
 const UserManagement: FC = () => {
@@ -196,13 +196,49 @@ const UserManagement: FC = () => {
     })
   }
 
-  function handleModalOk() {
-    // 这里可以添加保存逻辑
-    message.success('操作成功')
-    setEditModalVisible(false)
-    setRemarkModalVisible(false)
-    setAddModalVisible(false)
-    fetchData()
+  async function handleModalOk() {
+    try {
+      if (addModalVisible) {
+        // 新增用户
+        const values = await editForm.validateFields()
+        await addUser({
+          name: values.name,
+          telephone: values.telephone,
+          gender: values.gender,
+          age: Number(values.age)
+        })
+        message.success('新增用户成功')
+        setAddModalVisible(false)
+        editForm.resetFields()
+        fetchData()
+      } else if (editModalVisible) {
+        // 编辑用户
+        const values = await editForm.validateFields()
+        await updateUser({
+          id: currentRecord?.id,
+          name: values.name,
+          telephone: values.telephone,
+          gender: values.gender,
+          age: Number(values.age)
+        })
+        message.success('编辑用户成功')
+        setEditModalVisible(false)
+        fetchData()
+      } else if (remarkModalVisible) {
+        // 更新备注
+        const values = await editForm.validateFields()
+        // TODO: 调用更新备注API
+        message.success('更新备注成功')
+        setRemarkModalVisible(false)
+        fetchData()
+      }
+    } catch (error) {
+      if (error.errorFields) {
+        message.error('请检查表单输入')
+      } else {
+        message.error('操作失败')
+      }
+    }
   }
 
   function handleModalCancel() {
@@ -277,20 +313,45 @@ const UserManagement: FC = () => {
         cancelText="取消"
       >
         <Form form={editForm} layout="vertical">
-          <Form.Item name="name" label="姓名" rules={[{ required: true, message: '请输入姓名' }]}>
-            <Input />
+          <Form.Item
+            name="name"
+            label="姓名"
+            rules={[
+              { required: true, message: '请输入姓名' },
+              { min: 2, max: 20, message: '姓名长度应在2-20个字符之间' }
+            ]}
+          >
+            <Input placeholder="请输入姓名" />
           </Form.Item>
-          <Form.Item name="gender" label="性别" rules={[{ required: true, message: '请选择性别' }]}>
-            <Select>
+          <Form.Item
+            name="gender"
+            label="性别"
+            rules={[{ required: true, message: '请选择性别' }]}
+          >
+            <Select placeholder="请选择性别">
               <Select.Option value={1}>男</Select.Option>
               <Select.Option value={0}>女</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="age" label="年龄" rules={[{ required: true, message: '请输入年龄' }]}>
-            <Input type="number" />
+          <Form.Item
+            name="age"
+            label="年龄"
+            rules={[
+              { required: true, message: '请输入年龄' },
+              { type: 'number', min: 1, max: 150, message: '年龄应在1-150之间', transform: (value) => Number(value) }
+            ]}
+          >
+            <Input type="number" placeholder="请输入年龄" />
           </Form.Item>
-          <Form.Item name="telephone" label="电话" rules={[{ required: true, message: '请输入电话' }]}>
-            <Input />
+          <Form.Item
+            name="telephone"
+            label="电话"
+            rules={[
+              { required: true, message: '请输入电话' },
+              { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码' }
+            ]}
+          >
+            <Input placeholder="请输入手机号码" />
           </Form.Item>
         </Form>
       </Modal>
@@ -323,20 +384,45 @@ const UserManagement: FC = () => {
         cancelText="取消"
       >
         <Form form={editForm} layout="vertical">
-          <Form.Item name="name" label="姓名" rules={[{ required: true, message: '请输入姓名' }]}>
-            <Input />
+          <Form.Item
+            name="name"
+            label="姓名"
+            rules={[
+              { required: true, message: '请输入姓名' },
+              { min: 2, max: 20, message: '姓名长度应在2-20个字符之间' }
+            ]}
+          >
+            <Input placeholder="请输入姓名" />
           </Form.Item>
-          <Form.Item name="gender" label="性别" rules={[{ required: true, message: '请选择性别' }]}>
+          <Form.Item
+            name="gender"
+            label="性别"
+            rules={[{ required: true, message: '请选择性别' }]}
+          >
             <Select placeholder="请选择性别">
               <Select.Option value={1}>男</Select.Option>
               <Select.Option value={0}>女</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="age" label="年龄" rules={[{ required: true, message: '请输入年龄' }]}>
-            <Input type="number" />
+          <Form.Item
+            name="age"
+            label="年龄"
+            rules={[
+              { required: true, message: '请输入年龄' },
+              { type: 'number', min: 1, max: 150, message: '年龄应在1-150之间', transform: (value) => Number(value) }
+            ]}
+          >
+            <Input type="number" placeholder="请输入年龄" />
           </Form.Item>
-          <Form.Item name="telephone" label="电话" rules={[{ required: true, message: '请输入电话' }]}>
-            <Input />
+          <Form.Item
+            name="telephone"
+            label="电话"
+            rules={[
+              { required: true, message: '请输入电话' },
+              { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码' }
+            ]}
+          >
+            <Input placeholder="请输入手机号码" />
           </Form.Item>
         </Form>
       </Modal>

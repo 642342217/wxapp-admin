@@ -99,7 +99,7 @@ export function addUser(data: any): Promise<any> {
 
 export function updateUser(data: any): Promise<any> {
   return service({
-    url: '/admin/user/update',
+    url: '/admin/user/edit',
     method: 'post',
     data
   })
