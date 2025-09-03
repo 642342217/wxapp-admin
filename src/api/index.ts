@@ -112,3 +112,36 @@ export function updateUserRemark(data: { id: number; remarks: string }): Promise
     data
   })
 }
+
+// Account management APIs
+export function getAccountList(params: any): Promise<any> {
+  return service({
+    url: '/admin/account/page',
+    method: 'post',
+    data: params
+  })
+}
+
+export function addAccount(data: any): Promise<any> {
+  return service({
+    url: '/admin/account/add',
+    method: 'post',
+    data
+  })
+}
+
+export function updateAccount(data: any): Promise<any> {
+  return service({
+    url: '/admin/account/edit',
+    method: 'post',
+    data
+  })
+}
+
+export function deleteAccount(data: { id: number }): Promise<any> {
+  return service({
+    url: '/admin/account/delete',
+    method: 'post',
+    data
+  })
+}

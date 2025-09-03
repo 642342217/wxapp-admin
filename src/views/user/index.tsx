@@ -1,5 +1,6 @@
 import type { ColumnsType } from 'antd/es/table'
 import { type FC, useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Card,
   Button,
@@ -20,6 +21,7 @@ import { getUserList, updateUserStatus, addUser, updateUser, updateUserRemark } 
 import type { UserDataType, UserPageParams, UserPageResult } from './types'
 
 const UserManagement: FC = () => {
+  const navigate = useNavigate()
   const [tableLoading, setTableLoading] = useState(false)
   const [tableData, setTableData] = useState<UserDataType[]>([])
   const [tableTotal, setTableTotal] = useState<number>(0)
@@ -91,7 +93,7 @@ const UserManagement: FC = () => {
       title: '操作',
       key: 'action',
       align: 'center',
-      width: 200,
+      width: 280,
       render: (_, record: UserDataType) => (
         <Space>
           <Button size="small" onClick={() => handleEdit(record)}>
@@ -99,6 +101,9 @@ const UserManagement: FC = () => {
           </Button>
           <Button size="small" onClick={() => handleRemark(record)}>
             备注
+          </Button>
+          <Button size="small" onClick={() => handleAccountSettings(record)}>
+            账户设置
           </Button>
           <Button
             size="small"
@@ -172,6 +177,10 @@ const UserManagement: FC = () => {
     setCurrentRecord(record)
     setRemarkModalVisible(true)
     editForm.setFieldsValue({ remarks: record.remark || '' })
+  }
+
+  function handleAccountSettings(record: UserDataType) {
+    navigate(`/user/account/${record.id}`)
   }
 
   function handleStatusChange(record: UserDataType) {
