@@ -212,26 +212,6 @@ const AccountManagement: FC = () => {
 
   return (
     <PageWrapper>
-      {/* 面包屑导航 */}
-      <Card bordered={false} style={{ marginBottom: 16 }}>
-        <Row align="middle" justify="space-between">
-          <Col>
-            <Breadcrumb>
-              <Breadcrumb.Item>
-                <Button type="link" onClick={handleBack} icon={<ArrowLeftOutlined />}>
-                  {actualUserId === -1 ? '首页' : '用户管理'}
-                </Button>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>账户管理</Breadcrumb.Item>
-            </Breadcrumb>
-          </Col>
-          <Col>
-            <span>
-              {actualUserId === -1 ? '我的账户' : `用户ID: ${actualUserId}`}
-            </span>
-          </Col>
-        </Row>
-      </Card>
 
       {/* 搜索区域 */}
       <Card bordered={false} style={{ marginBottom: 16 }}>
