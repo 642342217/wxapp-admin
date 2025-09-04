@@ -22,7 +22,7 @@ const rootRoutes: RouteObject[] = [
   {
     path: '/',
     name: 'Root',
-    element: <Navigate to='/home' />
+    element: <Navigate to='/user/list' />
   },
   {
     path: '/login',
