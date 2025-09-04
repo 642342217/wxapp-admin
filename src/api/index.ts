@@ -194,3 +194,36 @@ export function updateBankAccountRemark(data: { id: number; remarks: string }): 
     data
   })
 }
+
+// Company management APIs
+export function getCompanyList(params: any): Promise<any> {
+  return service({
+    url: '/admin/company/page',
+    method: 'post',
+    data: params
+  })
+}
+
+export function addCompany(data: any): Promise<any> {
+  return service({
+    url: '/admin/company/add',
+    method: 'post',
+    data
+  })
+}
+
+export function updateCompany(data: any): Promise<any> {
+  return service({
+    url: '/admin/company/edit',
+    method: 'post',
+    data
+  })
+}
+
+export function updateCompanyStatus(data: { id: number; status: number }): Promise<any> {
+  return service({
+    url: '/admin/company/status',
+    method: 'post',
+    data
+  })
+}
