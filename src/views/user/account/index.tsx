@@ -21,6 +21,7 @@ import type { AccountDataType, AccountPageParams, AccountPageResult } from './ty
 
 const AccountManagement: FC = () => {
   const { userId } = useParams<{ userId: string }>()
+  const actualUserId = userId ? Number(userId) : -1
   const navigate = useNavigate()
   const [tableLoading, setTableLoading] = useState(false)
   const [tableData, setTableData] = useState<AccountDataType[]>([])
@@ -29,7 +30,7 @@ const AccountManagement: FC = () => {
   const [editForm] = Form.useForm()
 
   const [searchParams, setSearchParams] = useState<AccountPageParams>({
-    userId: Number(userId),
+    userId: actualUserId,
     account: '',
     pageSize: 10,
     pageNum: 1
@@ -56,8 +57,7 @@ const AccountManagement: FC = () => {
       title: '密码',
       dataIndex: 'password',
       align: 'center',
-      width: 200,
-      render: (password: string) => '••••••••'
+      width: 200
     },
     {
       title: '创建时间',
@@ -167,7 +167,7 @@ const AccountManagement: FC = () => {
         // 新增账户
         const values = await editForm.validateFields()
         await addAccount({
-          userId: Number(userId),
+          userId: actualUserId,
           account: values.account,
           password: values.password
         })
@@ -203,7 +203,11 @@ const AccountManagement: FC = () => {
   }
 
   function handleBack() {
-    navigate('/user/list')
+    if (actualUserId === -1) {
+      navigate('/dashboard') // 如果是从菜单进入的，返回首页
+    } else {
+      navigate('/user/list') // 如果是从用户管理进入的，返回用户列表
+    }
   }
 
   return (
@@ -215,14 +219,16 @@ const AccountManagement: FC = () => {
             <Breadcrumb>
               <Breadcrumb.Item>
                 <Button type="link" onClick={handleBack} icon={<ArrowLeftOutlined />}>
-                  用户管理
+                  {actualUserId === -1 ? '首页' : '用户管理'}
                 </Button>
               </Breadcrumb.Item>
               <Breadcrumb.Item>账户管理</Breadcrumb.Item>
             </Breadcrumb>
           </Col>
           <Col>
-            <span>用户ID: {userId}</span>
+            <span>
+              {actualUserId === -1 ? '我的账户' : `用户ID: ${actualUserId}`}
+            </span>
           </Col>
         </Row>
       </Card>

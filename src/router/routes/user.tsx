@@ -24,6 +24,15 @@ const UserRoute: RouteObject = {
       }
     },
     {
+      path: 'account',
+      name: 'UserAccountSelf',
+      element: LazyLoad(lazy(() => import('@/views/user/account'))),
+      meta: {
+        title: '账户管理',
+        key: 'userAccountSelf'
+      }
+    },
+    {
       path: 'account/:userId',
       name: 'UserAccount',
       element: LazyLoad(lazy(() => import('@/views/user/account'))),
