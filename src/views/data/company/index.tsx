@@ -119,8 +119,8 @@ const CompanyManagement: FC = () => {
         <Switch
           checked={status === 1}
           onChange={(checked) => handleStatusChange(record, checked)}
-          checkedChildren="启用"
-          unCheckedChildren="禁用"
+          checkedChildren="上架"
+          unCheckedChildren="未上架"
         />
       )
     },
@@ -203,7 +203,7 @@ const CompanyManagement: FC = () => {
 
   function handleStatusChange(record: CompanyDataType, checked: boolean) {
     const newStatus = checked ? 1 : 0
-    const action = newStatus === 1 ? '启用' : '禁用'
+    const action = newStatus === 1 ? '上架' : '下架'
 
     Modal.confirm({
       title: `确认${action}`,
@@ -247,8 +247,7 @@ const CompanyManagement: FC = () => {
         await addCompany({
           name: values.name,
           shortName: values.shortName,
-          icon: values.icon,
-          sort: Number(values.sort)
+          icon: values.icon
         })
         message.success('新增保司成功')
         setAddModalVisible(false)
@@ -418,16 +417,6 @@ const CompanyManagement: FC = () => {
             ]}
           >
             <Input placeholder="请输入图标链接" />
-          </Form.Item>
-          <Form.Item
-            name="sort"
-            label="排序"
-            rules={[
-              { required: true, message: '请输入排序值' },
-              { type: 'number', min: 0, max: 9999, message: '排序值应在0-9999之间', transform: (value) => Number(value) }
-            ]}
-          >
-            <InputNumber placeholder="请输入排序值" style={{ width: '100%' }} />
           </Form.Item>
         </Form>
       </Modal>
