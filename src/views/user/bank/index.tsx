@@ -12,24 +12,25 @@ import {
   Row,
   Col,
   message,
-  Breadcrumb
+  Breadcrumb,
+  Switch
 } from 'antd'
 import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { PageWrapper } from '@/components/Page'
-import { getAccountList, addAccount, updateAccount, deleteAccount } from '@/api'
-import type { AccountDataType, AccountPageParams, AccountPageResult } from './types'
+import { getBankAccountList, addBankAccount, updateBankAccount, deleteBankAccount } from '@/api'
+import type { BankAccountDataType, BankAccountPageParams, BankAccountPageResult } from './types'
 
-const AccountManagement: FC = () => {
+const BankAccountManagement: FC = () => {
   const { userId } = useParams<{ userId: string }>()
   const actualUserId = userId ? Number(userId) : -1
   const navigate = useNavigate()
   const [tableLoading, setTableLoading] = useState(false)
-  const [tableData, setTableData] = useState<AccountDataType[]>([])
+  const [tableData, setTableData] = useState<BankAccountDataType[]>([])
   const [tableTotal, setTableTotal] = useState<number>(0)
   const [searchForm] = Form.useForm()
   const [editForm] = Form.useForm()
 
-  const [searchParams, setSearchParams] = useState<AccountPageParams>({
+  const [searchParams, setSearchParams] = useState<BankAccountPageParams>({
     userId: actualUserId,
     account: '',
     pageSize: 10,
@@ -38,9 +39,9 @@ const AccountManagement: FC = () => {
 
   const [editModalVisible, setEditModalVisible] = useState(false)
   const [addModalVisible, setAddModalVisible] = useState(false)
-  const [currentRecord, setCurrentRecord] = useState<AccountDataType | null>(null)
+  const [currentRecord, setCurrentRecord] = useState<BankAccountDataType | null>(null)
 
-  const columns: ColumnsType<AccountDataType> = [
+  const columns: ColumnsType<BankAccountDataType> = [
     {
       title: 'ID',
       dataIndex: 'id',
@@ -54,10 +55,37 @@ const AccountManagement: FC = () => {
       width: 200
     },
     {
-      title: '密码',
-      dataIndex: 'password',
+      title: '银行',
+      dataIndex: 'bank',
       align: 'center',
       width: 200
+    },
+    {
+      title: '快捷号',
+      dataIndex: 'fastNum',
+      align: 'center',
+      width: 150
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      align: 'center',
+      width: 100,
+      render: (status: number, record: BankAccountDataType) => (
+        <Switch
+          checked={status === 1}
+          onChange={(checked) => handleStatusChange(record, checked)}
+          checkedChildren="启用"
+          unCheckedChildren="禁用"
+        />
+      )
+    },
+    {
+      title: '备注',
+      dataIndex: 'remarks',
+      align: 'center',
+      width: 150,
+      render: (remarks: string) => remarks || '-'
     },
     {
       title: '创建时间',
@@ -65,22 +93,6 @@ const AccountManagement: FC = () => {
       align: 'center',
       width: 180,
       render: (time: string) => new Date(time).toLocaleString()
-    },
-    {
-      title: '操作',
-      key: 'action',
-      align: 'center',
-      width: 150,
-      render: (_, record: AccountDataType) => (
-        <Space>
-          <Button size="small" onClick={() => handleEdit(record)}>
-            修改
-          </Button>
-          <Button size="small" danger onClick={() => handleDelete(record)}>
-            删除
-          </Button>
-        </Space>
-      )
     }
   ]
 
@@ -91,12 +103,12 @@ const AccountManagement: FC = () => {
   async function fetchData() {
     setTableLoading(true)
     try {
-      const data = await getAccountList(searchParams)
-      const { records, total } = data as AccountPageResult
+      const data = await getBankAccountList(searchParams)
+      const { records, total } = data as BankAccountPageResult
       setTableData(records)
       setTableTotal(total)
     } catch (error) {
-      message.error('获取账户列表失败')
+      message.error('获取银行账户列表失败')
     } finally {
       setTableLoading(false)
     }
@@ -133,29 +145,60 @@ const AccountManagement: FC = () => {
     editForm.resetFields()
   }
 
-  function handleEdit(record: AccountDataType) {
+  function handleEdit(record: BankAccountDataType) {
     setCurrentRecord(record)
     setEditModalVisible(true)
     editForm.setFieldsValue({
       account: record.account,
-      password: ''
+      bank: record.bank,
+      fastNum: record.fastNum,
+      remarks: record.remarks
     })
   }
 
-  function handleDelete(record: AccountDataType) {
+  function handleDelete(record: BankAccountDataType) {
     Modal.confirm({
       title: '确认删除',
-      content: `确定要删除账户"${record.account}"吗？`,
+      content: `确定要删除银行账户"${record.account}"吗？`,
       icon: <ExclamationCircleOutlined />,
       okText: '确定',
       cancelText: '取消',
       onOk: async () => {
         try {
-          await deleteAccount({ id: record.id })
-          message.success('删除账户成功')
+          await deleteBankAccount({ id: record.id })
+          message.success('删除银行账户成功')
           fetchData()
         } catch (error) {
-          message.error('删除账户失败')
+          message.error('删除银行账户失败')
+        }
+      }
+    })
+  }
+
+  function handleStatusChange(record: BankAccountDataType, checked: boolean) {
+    const newStatus = checked ? 1 : 0
+    const action = newStatus === 1 ? '启用' : '禁用'
+
+    Modal.confirm({
+      title: `确认${action}`,
+      content: `确定要${action}银行账户"${record.account}"吗？`,
+      icon: <ExclamationCircleOutlined />,
+      okText: '确定',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          await updateBankAccount({
+            id: record.id,
+            account: record.account,
+            bank: record.bank,
+            fastNum: record.fastNum,
+            status: newStatus,
+            remarks: record.remarks
+          })
+          message.success(`${action}成功`)
+          fetchData()
+        } catch (error) {
+          message.error(`${action}失败`)
         }
       }
     })
@@ -164,26 +207,30 @@ const AccountManagement: FC = () => {
   async function handleModalOk() {
     try {
       if (addModalVisible) {
-        // 新增账户
+        // 新增银行账户
         const values = await editForm.validateFields()
-        await addAccount({
+        await addBankAccount({
           userId: actualUserId,
           account: values.account,
-          password: values.password
+          bank: values.bank,
+          fastNum: values.fastNum,
+          remarks: values.remarks
         })
-        message.success('新增账户成功')
+        message.success('新增银行账户成功')
         setAddModalVisible(false)
         editForm.resetFields()
         fetchData()
       } else if (editModalVisible) {
-        // 编辑账户
+        // 编辑银行账户
         const values = await editForm.validateFields()
-        await updateAccount({
+        await updateBankAccount({
           id: currentRecord?.id!,
           account: values.account,
-          password: values.password
+          bank: values.bank,
+          fastNum: values.fastNum,
+          remarks: values.remarks
         })
-        message.success('编辑账户成功')
+        message.success('编辑银行账户成功')
         setEditModalVisible(false)
         fetchData()
       }
@@ -204,16 +251,16 @@ const AccountManagement: FC = () => {
 
   function handleBack() {
     if (actualUserId === -1) {
-      navigate('/dashboard') // 如果是从菜单进入的，返回首页
+      navigate('/dashboard')
     } else {
-      navigate('/user/list') // 如果是从用户管理进入的，返回用户列表
+      navigate('/user/list')
     }
   }
 
   return (
     <PageWrapper>
 
-      {/* 搜索区域 - 仅在我的账户（actualUserId === -1）时显示 */}
+      {/* 搜索区域 - 仅在我的银行账户（actualUserId === -1）时显示 */}
       {actualUserId === -1 && (
         <Card bordered={false} style={{ marginBottom: 16 }}>
           <Form form={searchForm} layout="inline">
@@ -236,14 +283,6 @@ const AccountManagement: FC = () => {
 
       {/* 内容区域 */}
       <Card bordered={false}>
-        {/* 操作按钮区域 */}
-        <Row style={{ marginBottom: 16 }}>
-          <Col>
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              新增账户
-            </Button>
-          </Col>
-        </Row>
 
         {/* 表格 */}
         <Table
@@ -264,13 +303,13 @@ const AccountManagement: FC = () => {
         />
       </Card>
 
-      {/* 编辑账户模态框 */}
+      {/* 编辑银行账户模态框 */}
       <Modal
-        title="编辑账户"
+        title="编辑银行账户"
         open={editModalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
-        width={500}
+        width={600}
         okText="确定"
         cancelText="取消"
       >
@@ -280,31 +319,44 @@ const AccountManagement: FC = () => {
             label="账户名"
             rules={[
               { required: true, message: '请输入账户名' },
-              { min: 3, max: 20, message: '账户名长度应在3-20个字符之间' }
+              { min: 3, max: 50, message: '账户名长度应在3-50个字符之间' }
             ]}
           >
             <Input placeholder="请输入账户名" />
           </Form.Item>
           <Form.Item
-            name="password"
-            label="密码"
+            name="bank"
+            label="银行"
             rules={[
-              { required: true, message: '请输入密码' },
-              { min: 6, max: 20, message: '密码长度应在6-20个字符之间' }
+              { required: true, message: '请输入银行名称' },
+              { min: 2, max: 50, message: '银行名称长度应在2-50个字符之间' }
             ]}
           >
-            <Input.Password placeholder="请输入密码" />
+            <Input placeholder="请输入银行名称" />
+          </Form.Item>
+          <Form.Item
+            name="fastNum"
+            label="快捷号"
+            rules={[
+              { required: true, message: '请输入快捷号' },
+              { min: 1, max: 20, message: '快捷号长度应在1-20个字符之间' }
+            ]}
+          >
+            <Input placeholder="请输入快捷号" />
+          </Form.Item>
+          <Form.Item name="remarks" label="备注">
+            <Input.TextArea rows={3} placeholder="请输入备注信息" />
           </Form.Item>
         </Form>
       </Modal>
 
-      {/* 新增账户模态框 */}
+      {/* 新增银行账户模态框 */}
       <Modal
-        title="新增账户"
+        title="新增银行账户"
         open={addModalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
-        width={500}
+        width={600}
         okText="确定"
         cancelText="取消"
       >
@@ -314,20 +366,33 @@ const AccountManagement: FC = () => {
             label="账户名"
             rules={[
               { required: true, message: '请输入账户名' },
-              { min: 3, max: 20, message: '账户名长度应在3-20个字符之间' }
+              { min: 3, max: 50, message: '账户名长度应在3-50个字符之间' }
             ]}
           >
             <Input placeholder="请输入账户名" />
           </Form.Item>
           <Form.Item
-            name="password"
-            label="密码"
+            name="bank"
+            label="银行"
             rules={[
-              { required: true, message: '请输入密码' },
-              { min: 6, max: 20, message: '密码长度应在6-20个字符之间' }
+              { required: true, message: '请输入银行名称' },
+              { min: 2, max: 50, message: '银行名称长度应在2-50个字符之间' }
             ]}
           >
-            <Input.Password placeholder="请输入密码" />
+            <Input placeholder="请输入银行名称" />
+          </Form.Item>
+          <Form.Item
+            name="fastNum"
+            label="快捷号"
+            rules={[
+              { required: true, message: '请输入快捷号' },
+              { min: 1, max: 20, message: '快捷号长度应在1-20个字符之间' }
+            ]}
+          >
+            <Input placeholder="请输入快捷号" />
+          </Form.Item>
+          <Form.Item name="remarks" label="备注">
+            <Input.TextArea rows={3} placeholder="请输入备注信息" />
           </Form.Item>
         </Form>
       </Modal>
@@ -335,4 +400,4 @@ const AccountManagement: FC = () => {
   )
 }
 
-export default AccountManagement
+export default BankAccountManagement

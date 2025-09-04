@@ -116,7 +116,7 @@ const UserManagement: FC = () => {
       title: '操作',
       key: 'action',
       align: 'center',
-      width: 160,
+      width: 220,
       render: (_, record: UserDataType) => (
         <Space>
           <Button size="small" onClick={() => handleEdit(record)}>
@@ -124,6 +124,9 @@ const UserManagement: FC = () => {
           </Button>
           <Button size="small" onClick={() => handleAccountSettings(record)}>
             账户设置
+          </Button>
+          <Button size="small" onClick={() => handleBankAccount(record)}>
+            银行账户
           </Button>
         </Space>
       )
@@ -193,6 +196,10 @@ const UserManagement: FC = () => {
 
   function handleAccountSettings(record: UserDataType) {
     navigate(`/user/account/${record.id}`)
+  }
+
+  function handleBankAccount(record: UserDataType) {
+    navigate(`/user/bank/${record.id}`)
   }
 
   function handleStatusChange(record: UserDataType, checked: boolean) {

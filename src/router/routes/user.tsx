@@ -41,6 +41,25 @@ const UserRoute: RouteObject = {
         key: 'userAccount',
         hideMenu: true
       }
+    },
+    {
+      path: 'bank',
+      name: 'UserBankSelf',
+      element: LazyLoad(lazy(() => import('@/views/user/bank'))),
+      meta: {
+        title: '银行账户管理',
+        key: 'userBankSelf'
+      }
+    },
+    {
+      path: 'bank/:userId',
+      name: 'UserBank',
+      element: LazyLoad(lazy(() => import('@/views/user/bank'))),
+      meta: {
+        title: '银行账户管理',
+        key: 'userBank',
+        hideMenu: true
+      }
     }
   ]
 }

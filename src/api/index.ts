@@ -145,3 +145,36 @@ export function deleteAccount(data: { id: number }): Promise<any> {
     data
   })
 }
+
+// Bank Account management APIs
+export function getBankAccountList(params: any): Promise<any> {
+  return service({
+    url: '/admin/user/account/page',
+    method: 'post',
+    data: params
+  })
+}
+
+export function addBankAccount(data: any): Promise<any> {
+  return service({
+    url: '/admin/bank/add',
+    method: 'post',
+    data
+  })
+}
+
+export function updateBankAccount(data: any): Promise<any> {
+  return service({
+    url: '/admin/bank/edit',
+    method: 'post',
+    data
+  })
+}
+
+export function deleteBankAccount(data: { id: number }): Promise<any> {
+  return service({
+    url: '/admin/bank/delete',
+    method: 'post',
+    data
+  })
+}
