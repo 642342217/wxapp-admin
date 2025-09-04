@@ -235,3 +235,44 @@ export function updateCompanySort(data: { id: number; icon: string; name: string
     data
   })
 }
+
+// Category management APIs
+export function getCategoryList(params: any): Promise<any> {
+  return service({
+    url: '/admin/company/article/category/page',
+    method: 'post',
+    data: params
+  })
+}
+
+export function addCategory(data: { companyId: number; name: string }): Promise<any> {
+  return service({
+    url: '/admin/company/article/category/add',
+    method: 'post',
+    data
+  })
+}
+
+export function updateCategory(data: { id: number; companyId: number; name: string }): Promise<any> {
+  return service({
+    url: '/admin/company/article/category/edit',
+    method: 'post',
+    data
+  })
+}
+
+export function updateCategoryStatus(data: { id: number; status: number }): Promise<any> {
+  return service({
+    url: '/admin/company/article/category/status',
+    method: 'post',
+    data
+  })
+}
+
+export function updateCategorySort(data: { id: number; sort: number }): Promise<any> {
+  return service({
+    url: '/admin/company/article/category/sort',
+    method: 'post',
+    data
+  })
+}
