@@ -189,7 +189,7 @@ export function updateBankAccountStatus(data: { id: number; status: number }): P
 
 export function updateBankAccountRemark(data: { id: number; remarks: string }): Promise<any> {
   return service({
-    url: '/admin/bank/remarks',
+    url: '/admin/user/remarks',
     method: 'post',
     data
   })
