@@ -6,7 +6,7 @@ export interface UserDataType {
   telephone: string
   status: number
   createTime: string
-  remark?: string
+  remarks?: string
 }
 
 export interface UserPageParams {

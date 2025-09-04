@@ -13,9 +13,10 @@ import {
   Select,
   Row,
   Col,
-  message
+  message,
+  Switch
 } from 'antd'
-import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, EditOutlined } from '@ant-design/icons'
 import { PageWrapper } from '@/components/Page'
 import { getUserList, updateUserStatus, addUser, updateUser, updateUserRemark } from '@/api'
 import type { UserDataType, UserPageParams, UserPageResult } from './types'
@@ -27,6 +28,7 @@ const UserManagement: FC = () => {
   const [tableTotal, setTableTotal] = useState<number>(0)
   const [searchForm] = Form.useForm()
   const [editForm] = Form.useForm()
+  const [remarkForm] = Form.useForm()
 
   const [searchParams, setSearchParams] = useState<UserPageParams>({
     name: '',
@@ -76,10 +78,31 @@ const UserManagement: FC = () => {
       dataIndex: 'status',
       align: 'center',
       width: 100,
-      render: (status: number) => (
-        <Tag color={status === 1 ? 'green' : 'red'}>
-          {status === 1 ? '正常' : '封号'}
-        </Tag>
+      render: (status: number, record: UserDataType) => (
+        <Switch
+          checked={status === 1}
+          onChange={(checked) => handleStatusChange(record, checked)}
+          checkedChildren="正常"
+          unCheckedChildren="封号"
+        />
+      )
+    },
+    {
+      title: '备注',
+      dataIndex: 'remarks',
+      align: 'center',
+      width: 180,
+      render: (remarks: string, record: UserDataType) => (
+        <Space>
+          <span>{remarks || '-'}</span>
+          <Button
+            type="text"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => handleRemark(record)}
+            title="编辑备注"
+          />
+        </Space>
       )
     },
     {
@@ -93,25 +116,14 @@ const UserManagement: FC = () => {
       title: '操作',
       key: 'action',
       align: 'center',
-      width: 280,
+      width: 160,
       render: (_, record: UserDataType) => (
         <Space>
           <Button size="small" onClick={() => handleEdit(record)}>
             修改
           </Button>
-          <Button size="small" onClick={() => handleRemark(record)}>
-            备注
-          </Button>
           <Button size="small" onClick={() => handleAccountSettings(record)}>
             账户设置
-          </Button>
-          <Button
-            size="small"
-            type={record.status === 1 ? 'primary' : 'default'}
-            danger={record.status === 1}
-            onClick={() => handleStatusChange(record)}
-          >
-            {record.status === 1 ? '封号' : '解封'}
           </Button>
         </Space>
       )
@@ -176,16 +188,16 @@ const UserManagement: FC = () => {
   function handleRemark(record: UserDataType) {
     setCurrentRecord(record)
     setRemarkModalVisible(true)
-    editForm.setFieldsValue({ remarks: record.remark || '' })
+    remarkForm.setFieldsValue({ remarks: record.remarks || '' })
   }
 
   function handleAccountSettings(record: UserDataType) {
     navigate(`/user/account/${record.id}`)
   }
 
-  function handleStatusChange(record: UserDataType) {
-    const newStatus = record.status === 1 ? 0 : 1
-    const action = newStatus === 1 ? '解封' : '封号'
+  function handleStatusChange(record: UserDataType, checked: boolean) {
+    const newStatus = checked ? 1 : 0
+    const action = newStatus === 1 ? '启用' : '禁用'
 
     Modal.confirm({
       title: `确认${action}`,
@@ -235,13 +247,14 @@ const UserManagement: FC = () => {
         fetchData()
       } else if (remarkModalVisible) {
         // 更新备注
-        const values = await editForm.validateFields()
+        const values = await remarkForm.validateFields()
         await updateUserRemark({
           id: currentRecord?.id!,
           remarks: values.remarks
         })
         message.success('更新备注成功')
         setRemarkModalVisible(false)
+        remarkForm.resetFields()
         fetchData()
       }
     } catch (error) {
@@ -378,7 +391,7 @@ const UserManagement: FC = () => {
         okText="确定"
         cancelText="取消"
       >
-        <Form form={editForm} layout="vertical">
+        <Form form={remarkForm} layout="vertical">
           <Form.Item name="remarks" label="备注">
             <Input.TextArea rows={4} placeholder="请输入备注信息" />
           </Form.Item>
