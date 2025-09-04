@@ -15,9 +15,9 @@ import {
   Breadcrumb,
   Switch
 } from 'antd'
-import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, ArrowLeftOutlined } from '@ant-design/icons'
+import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, ArrowLeftOutlined, EditOutlined } from '@ant-design/icons'
 import { PageWrapper } from '@/components/Page'
-import { getBankAccountList, addBankAccount, updateBankAccount, deleteBankAccount } from '@/api'
+import { getBankAccountList, addBankAccount, updateBankAccount, deleteBankAccount, updateBankAccountStatus, updateBankAccountRemark } from '@/api'
 import type { BankAccountDataType, BankAccountPageParams, BankAccountPageResult } from './types'
 
 const BankAccountManagement: FC = () => {
@@ -39,7 +39,9 @@ const BankAccountManagement: FC = () => {
 
   const [editModalVisible, setEditModalVisible] = useState(false)
   const [addModalVisible, setAddModalVisible] = useState(false)
+  const [remarkModalVisible, setRemarkModalVisible] = useState(false)
   const [currentRecord, setCurrentRecord] = useState<BankAccountDataType | null>(null)
+  const [remarkForm] = Form.useForm()
 
   const columns: ColumnsType<BankAccountDataType> = [
     {
@@ -75,8 +77,8 @@ const BankAccountManagement: FC = () => {
         <Switch
           checked={status === 1}
           onChange={(checked) => handleStatusChange(record, checked)}
-          checkedChildren="启用"
-          unCheckedChildren="禁用"
+          checkedChildren="正常"
+          unCheckedChildren="失效"
         />
       )
     },
@@ -84,8 +86,19 @@ const BankAccountManagement: FC = () => {
       title: '备注',
       dataIndex: 'remarks',
       align: 'center',
-      width: 150,
-      render: (remarks: string) => remarks || '-'
+      width: 180,
+      render: (remarks: string, record: BankAccountDataType) => (
+        <Space>
+          <span>{remarks || '-'}</span>
+          <Button
+            type="text"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => handleRemark(record)}
+            title="编辑备注"
+          />
+        </Space>
+      )
     },
     {
       title: '创建时间',
@@ -175,9 +188,15 @@ const BankAccountManagement: FC = () => {
     })
   }
 
+  function handleRemark(record: BankAccountDataType) {
+    setCurrentRecord(record)
+    setRemarkModalVisible(true)
+    remarkForm.setFieldsValue({ remarks: record.remarks || '' })
+  }
+
   function handleStatusChange(record: BankAccountDataType, checked: boolean) {
     const newStatus = checked ? 1 : 0
-    const action = newStatus === 1 ? '启用' : '禁用'
+    const action = newStatus === 1 ? '设为正常' : '设为失效'
 
     Modal.confirm({
       title: `确认${action}`,
@@ -187,14 +206,7 @@ const BankAccountManagement: FC = () => {
       cancelText: '取消',
       onOk: async () => {
         try {
-          await updateBankAccount({
-            id: record.id,
-            account: record.account,
-            bank: record.bank,
-            fastNum: record.fastNum,
-            status: newStatus,
-            remarks: record.remarks
-          })
+          await updateBankAccountStatus({ id: record.id, status: newStatus })
           message.success(`${action}成功`)
           fetchData()
         } catch (error) {
@@ -233,6 +245,17 @@ const BankAccountManagement: FC = () => {
         message.success('编辑银行账户成功')
         setEditModalVisible(false)
         fetchData()
+      } else if (remarkModalVisible) {
+        // 更新备注
+        const values = await remarkForm.validateFields()
+        await updateBankAccountRemark({
+          id: currentRecord?.id!,
+          remarks: values.remarks
+        })
+        message.success('更新备注成功')
+        setRemarkModalVisible(false)
+        remarkForm.resetFields()
+        fetchData()
       }
     } catch (error) {
       if (error.errorFields) {
@@ -245,6 +268,7 @@ const BankAccountManagement: FC = () => {
 
   function handleModalCancel() {
     setEditModalVisible(false)
+    setRemarkModalVisible(false)
     setAddModalVisible(false)
     setCurrentRecord(null)
   }
@@ -393,6 +417,23 @@ const BankAccountManagement: FC = () => {
           </Form.Item>
           <Form.Item name="remarks" label="备注">
             <Input.TextArea rows={3} placeholder="请输入备注信息" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 备注模态框 */}
+      <Modal
+        title="银行账户备注"
+        open={remarkModalVisible}
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+        width={500}
+        okText="确定"
+        cancelText="取消"
+      >
+        <Form form={remarkForm} layout="vertical">
+          <Form.Item name="remarks" label="备注">
+            <Input.TextArea rows={4} placeholder="请输入备注信息" />
           </Form.Item>
         </Form>
       </Modal>

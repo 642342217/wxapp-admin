@@ -178,3 +178,19 @@ export function deleteBankAccount(data: { id: number }): Promise<any> {
     data
   })
 }
+
+export function updateBankAccountStatus(data: { id: number; status: number }): Promise<any> {
+  return service({
+    url: '/admin/user/account/status',
+    method: 'post',
+    data
+  })
+}
+
+export function updateBankAccountRemark(data: { id: number; remarks: string }): Promise<any> {
+  return service({
+    url: '/admin/bank/remarks',
+    method: 'post',
+    data
+  })
+}
