@@ -227,3 +227,11 @@ export function updateCompanyStatus(data: { id: number; status: number }): Promi
     data
   })
 }
+
+export function updateCompanySort(data: { id: number; sort: number }): Promise<any> {
+  return service({
+    url: '/admin/company/sort',
+    method: 'post',
+    data
+  })
+}

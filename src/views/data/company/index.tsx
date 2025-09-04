@@ -15,9 +15,9 @@ import {
   Image,
   InputNumber
 } from 'antd'
-import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, MinusOutlined } from '@ant-design/icons'
 import { PageWrapper } from '@/components/Page'
-import { getCompanyList, updateCompanyStatus, addCompany, updateCompany } from '@/api'
+import { getCompanyList, updateCompanyStatus, addCompany, updateCompany, updateCompanySort } from '@/api'
 import type { CompanyDataType, CompanyPageParams, CompanyPageResult } from './types'
 
 const CompanyManagement: FC = () => {
@@ -74,7 +74,41 @@ const CompanyManagement: FC = () => {
       title: '排序',
       dataIndex: 'sort',
       align: 'center',
-      width: 100
+      width: 150,
+      render: (sort: number, record: CompanyDataType) => (
+        <Space.Compact>
+          <Button
+            size="small"
+            icon={<MinusOutlined />}
+            onClick={() => handleSortChange(record, Math.max(0, sort - 1))}
+          />
+          <InputNumber
+            size="small"
+            value={sort}
+            min={0}
+            max={9999}
+            controls={false}
+            style={{ width: 60 }}
+            onBlur={(e) => {
+              const value = Number(e.target.value)
+              if (!isNaN(value) && value !== sort) {
+                handleSortChange(record, value)
+              }
+            }}
+            onPressEnter={(e) => {
+              const value = Number((e.target as HTMLInputElement).value)
+              if (!isNaN(value) && value !== sort) {
+                handleSortChange(record, value)
+              }
+            }}
+          />
+          <Button
+            size="small"
+            icon={<PlusOutlined />}
+            onClick={() => handleSortChange(record, Math.min(9999, sort + 1))}
+          />
+        </Space.Compact>
+      )
     },
     {
       title: '状态',
@@ -187,6 +221,16 @@ const CompanyManagement: FC = () => {
         }
       }
     })
+  }
+
+  async function handleSortChange(record: CompanyDataType, newSort: number) {
+    try {
+      await updateCompanySort({ id: record.id, sort: newSort })
+      message.success('排序更新成功')
+      fetchData()
+    } catch (error) {
+      message.error('排序更新失败')
+    }
   }
 
   async function handleModalOk() {
