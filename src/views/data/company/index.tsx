@@ -225,7 +225,13 @@ const CompanyManagement: FC = () => {
 
   async function handleSortChange(record: CompanyDataType, newSort: number) {
     try {
-      await updateCompanySort({ id: record.id, sort: newSort })
+      await updateCompanySort({
+        id: record.id,
+        icon: record.icon,
+        name: record.name,
+        shortName: record.shortName,
+        sort: newSort
+      })
       message.success('排序更新成功')
       fetchData()
     } catch (error) {
@@ -368,16 +374,6 @@ const CompanyManagement: FC = () => {
             ]}
           >
             <Input placeholder="请输入图标链接" />
-          </Form.Item>
-          <Form.Item
-            name="sort"
-            label="排序"
-            rules={[
-              { required: true, message: '请输入排序值' },
-              { type: 'number', min: 0, max: 9999, message: '排序值应在0-9999之间', transform: (value) => Number(value) }
-            ]}
-          >
-            <InputNumber placeholder="请输入排序值" style={{ width: '100%' }} />
           </Form.Item>
         </Form>
       </Modal>

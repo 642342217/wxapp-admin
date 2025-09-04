@@ -228,9 +228,9 @@ export function updateCompanyStatus(data: { id: number; status: number }): Promi
   })
 }
 
-export function updateCompanySort(data: { id: number; sort: number }): Promise<any> {
+export function updateCompanySort(data: { id: number; icon: string; name: string; shortName: string; sort: number }): Promise<any> {
   return service({
-    url: '/admin/company/sort',
+    url: '/admin/company/edit',
     method: 'post',
     data
   })
