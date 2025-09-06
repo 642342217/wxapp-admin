@@ -1,5 +1,6 @@
 import type { ColumnsType } from 'antd/es/table'
 import { type FC, useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Card,
   Button,
@@ -13,14 +14,17 @@ import {
   message,
   Switch,
   Image,
-  InputNumber
+  InputNumber,
+  Tooltip
 } from 'antd'
-import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, MinusOutlined } from '@ant-design/icons'
+import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, MinusOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import { PageWrapper } from '@/components/Page'
-import { getArticleList, updateArticleStatus, addArticle, updateArticle, updateArticleSort } from '@/api'
+import { getArticleList, updateArticleStatus, addArticle, updateArticle, updateArticleSort, updateArticleContent } from '@/api'
 import type { ArticleDataType, ArticlePageParams, ArticlePageResult } from './types'
+import RichTextEditor from '@/components/RichTextEditor'
 
 const ArticleManagement: FC = () => {
+  const navigate = useNavigate()
   const [tableLoading, setTableLoading] = useState(false)
   const [tableData, setTableData] = useState<ArticleDataType[]>([])
   const [tableTotal, setTableTotal] = useState<number>(0)
@@ -36,6 +40,10 @@ const ArticleManagement: FC = () => {
   const [editModalVisible, setEditModalVisible] = useState(false)
   const [addModalVisible, setAddModalVisible] = useState(false)
   const [currentRecord, setCurrentRecord] = useState<ArticleDataType | null>(null)
+  const [richTextModalVisible, setRichTextModalVisible] = useState(false)
+  const [previewModalVisible, setPreviewModalVisible] = useState(false)
+  const [currentContent, setCurrentContent] = useState('')
+  const [editingRecord, setEditingRecord] = useState<ArticleDataType | null>(null)
 
   const columns: ColumnsType<ArticleDataType> = [
     {
@@ -75,6 +83,32 @@ const ArticleManagement: FC = () => {
       dataIndex: 'categoryId',
       align: 'center',
       width: 100
+    },
+    {
+      title: '内容',
+      dataIndex: 'content',
+      align: 'center',
+      width: 150,
+      render: (content: string, record: ArticleDataType) => (
+        <Space>
+          <Tooltip title="编辑内容">
+            <Button
+              size="small"
+              type="text"
+              icon={<EditOutlined />}
+              onClick={() => handleEditContent(record)}
+            />
+          </Tooltip>
+          <Tooltip title="预览内容">
+            <Button
+              size="small"
+              type="text"
+              icon={<EyeOutlined />}
+              onClick={() => handlePreviewContent(record)}
+            />
+          </Tooltip>
+        </Space>
+      )
     },
     {
       title: '排序',
@@ -242,6 +276,34 @@ const ArticleManagement: FC = () => {
     }
   }
 
+  function handleEditContent(record: ArticleDataType) {
+    setEditingRecord(record)
+    setCurrentContent(record.content || '')
+    setRichTextModalVisible(true)
+  }
+
+  function handlePreviewContent(record: ArticleDataType) {
+    setEditingRecord(record)
+    setCurrentContent(record.content || '')
+    setPreviewModalVisible(true)
+  }
+
+  function handleRichTextSave(content: string) {
+    if (editingRecord) {
+      // 这里调用保存内容的API
+      updateArticleContent({
+        id: editingRecord.id,
+        content: content
+      }).then(() => {
+        message.success('内容保存成功')
+        setRichTextModalVisible(false)
+        fetchData()
+      }).catch(() => {
+        message.error('内容保存失败')
+      })
+    }
+  }
+
   async function handleModalOk() {
     try {
       if (addModalVisible) {
@@ -314,9 +376,14 @@ const ArticleManagement: FC = () => {
         {/* 操作按钮区域 */}
         <Row style={{ marginBottom: 16 }}>
           <Col>
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              新增文章
-            </Button>
+            <Space>
+              <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+                新增文章
+              </Button>
+              <Button icon={<EyeOutlined />} onClick={() => navigate('/data/article/preview')}>
+                预览调试
+              </Button>
+            </Space>
           </Col>
         </Row>
 
@@ -463,6 +530,49 @@ const ArticleManagement: FC = () => {
             <Input.TextArea rows={6} placeholder="请输入文章内容" />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* 富文本编辑器模态框 */}
+      <Modal
+        title={`编辑内容 - ${editingRecord?.name || ''}`}
+        open={richTextModalVisible}
+        onOk={() => handleRichTextSave(currentContent)}
+        onCancel={() => setRichTextModalVisible(false)}
+        width={1200}
+        okText="保存"
+        cancelText="取消"
+        style={{ top: 20 }}
+      >
+        <RichTextEditor
+          value={currentContent}
+          onChange={setCurrentContent}
+          height={500}
+        />
+      </Modal>
+
+      {/* 内容预览模态框 */}
+      <Modal
+        title={`内容预览 - ${editingRecord?.name || ''}`}
+        open={previewModalVisible}
+        onCancel={() => setPreviewModalVisible(false)}
+        width={1000}
+        footer={[
+          <Button key="close" onClick={() => setPreviewModalVisible(false)}>
+            关闭
+          </Button>
+        ]}
+        style={{ top: 20 }}
+      >
+        <div style={{ maxHeight: '600px', overflow: 'auto', padding: '16px', border: '1px solid #d9d9d9', borderRadius: '6px', backgroundColor: '#fff' }}>
+          <div
+            dangerouslySetInnerHTML={{ __html: currentContent }}
+            style={{
+              lineHeight: '1.6',
+              fontSize: '14px',
+              color: '#333'
+            }}
+          />
+        </div>
       </Modal>
     </PageWrapper>
   )

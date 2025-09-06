@@ -37,8 +37,18 @@ const DataRoute: RouteObject = {
       name: 'ArticleManagement',
       element: LazyLoad(lazy(() => import('@/views/data/article'))),
       meta: {
-        title: '资料管理',
+        title: '文章列表',
         key: 'articleManagement'
+      }
+    },
+    {
+      path: 'article/preview',
+      name: 'ArticlePreview',
+      element: LazyLoad(lazy(() => import('@/views/data/article/preview'))),
+      meta: {
+        title: '文章预览',
+        key: 'articlePreview',
+        hideMenu: true
       }
     }
   ]

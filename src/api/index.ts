@@ -317,3 +317,30 @@ export function updateArticleSort(data: { id: number; sort: number }): Promise<a
     data
   })
 }
+
+export function updateArticleContent(data: { id: number; content: string }): Promise<any> {
+  return service({
+    url: '/admin/company/article/content',
+    method: 'post',
+    data
+  })
+}
+
+// Mock文件上传接口
+export function uploadFile(file: File): Promise<{ url: string }> {
+  return new Promise((resolve) => {
+    // Mock上传逻辑，实际项目中替换为真实接口
+    setTimeout(() => {
+      const mockUrl = URL.createObjectURL(file)
+      resolve({ url: mockUrl })
+    }, 1000)
+  })
+}
+
+export function uploadImage(file: File): Promise<{ url: string }> {
+  return uploadFile(file)
+}
+
+export function uploadVideo(file: File): Promise<{ url: string }> {
+  return uploadFile(file)
+}
