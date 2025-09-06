@@ -92,33 +92,21 @@ const ArticleManagement: FC = () => {
       width: 200,
       render: (content: string, record: ArticleDataType) => (
         <Space direction="vertical" size="small" style={{ width: '100%' }}>
-          <div style={{
-            fontSize: '12px',
-            color: '#666',
-            maxWidth: '150px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
-          }}>
-            {getContentPreview(content, 30)}
-          </div>
           <Space>
-            <Tooltip title="编辑内容">
-              <Button
-                size="small"
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => handleEditContent(record)}
-              />
-            </Tooltip>
-            <Tooltip title="预览内容">
+            <Button
+              size="small"
+              // type="text"
+              icon={<EditOutlined />}
+              onClick={() => handleEditContent(record)}
+            >编辑内容</Button>
+            {/* <Tooltip title="预览内容">
               <Button
                 size="small"
                 type="text"
                 icon={<EyeOutlined />}
                 onClick={() => handlePreviewContent(record)}
               />
-            </Tooltip>
+            </Tooltip> */}
           </Space>
         </Space>
       )
@@ -392,9 +380,9 @@ const ArticleManagement: FC = () => {
               <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
                 新增文章
               </Button>
-              <Button icon={<EyeOutlined />} onClick={() => navigate('/data/article/preview')}>
+              {/* <Button icon={<EyeOutlined />} onClick={() => navigate('/data/article/preview')}>
                 预览调试
-              </Button>
+              </Button> */}
             </Space>
           </Col>
         </Row>
