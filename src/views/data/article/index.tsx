@@ -421,6 +421,13 @@ const ArticleManagement: FC = () => {
         width={800}
         okText="确定"
         cancelText="取消"
+        style={{ top: 20 }}
+        styles={{
+          body: {
+            maxHeight: 'calc(100vh - 200px)',
+            overflowY: 'auto'
+          }
+        }}
       >
         <Form form={editForm} layout="vertical">
           <Form.Item
@@ -579,6 +586,13 @@ const ArticleManagement: FC = () => {
         width={800}
         okText="确定"
         cancelText="取消"
+        style={{ top: 20 }}
+        styles={{
+          body: {
+            maxHeight: 'calc(100vh - 200px)',
+            overflowY: 'auto'
+          }
+        }}
       >
         <Form form={editForm} layout="vertical">
           <Form.Item
@@ -738,6 +752,12 @@ const ArticleManagement: FC = () => {
         okText="保存"
         cancelText="取消"
         style={{ top: 20 }}
+        styles={{
+          body: {
+            maxHeight: 'calc(100vh - 200px)',
+            overflowY: 'auto'
+          }
+        }}
       >
         <RichTextEditor
           value={currentContent}
@@ -758,6 +778,12 @@ const ArticleManagement: FC = () => {
           </Button>
         ]}
         style={{ top: 20 }}
+        styles={{
+          body: {
+            maxHeight: 'calc(100vh - 200px)',
+            overflowY: 'auto'
+          }
+        }}
       >
         <div style={{ maxHeight: '600px', overflow: 'auto', padding: '16px', border: '1px solid #d9d9d9', borderRadius: '6px', backgroundColor: '#fff' }}>
           <div

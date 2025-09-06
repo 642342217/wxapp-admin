@@ -356,3 +356,36 @@ export function uploadDocument(file: File): Promise<{ url: string }> {
 export function uploadAudio(file: File): Promise<{ url: string }> {
   return uploadFile(file)
 }
+
+// Customer management APIs
+export function getCustomerList(params: any): Promise<any> {
+  return service({
+    url: '/admin/custom/page',
+    method: 'post',
+    data: params
+  })
+}
+
+export function addCustomer(data: any): Promise<any> {
+  return service({
+    url: '/admin/custom/add',
+    method: 'post',
+    data
+  })
+}
+
+export function updateCustomer(data: any): Promise<any> {
+  return service({
+    url: '/admin/custom/edit',
+    method: 'post',
+    data
+  })
+}
+
+export function updateCustomerStatus(data: { id: number; status: number }): Promise<any> {
+  return service({
+    url: '/admin/custom/status',
+    method: 'post',
+    data
+  })
+}

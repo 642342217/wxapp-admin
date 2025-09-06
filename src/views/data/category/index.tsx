@@ -282,6 +282,13 @@ const CategoryManagement: FC = () => {
         width={600}
         okText="确定"
         cancelText="取消"
+        style={{ top: 20 }}
+        styles={{
+          body: {
+            maxHeight: 'calc(100vh - 200px)',
+            overflowY: 'auto'
+          }
+        }}
       >
         <Form form={editForm} layout="vertical">
           <Form.Item
@@ -316,6 +323,13 @@ const CategoryManagement: FC = () => {
         width={600}
         okText="确定"
         cancelText="取消"
+        style={{ top: 20 }}
+        styles={{
+          body: {
+            maxHeight: 'calc(100vh - 200px)',
+            overflowY: 'auto'
+          }
+        }}
       >
         <Form form={editForm} layout="vertical">
           <Form.Item

@@ -63,6 +63,13 @@ export default function ChangePasswordModal({ open, onCancel }: ChangePasswordMo
       destroyOnClose
       okText="确定"
       cancelText="取消"
+      style={{ top: 20 }}
+      styles={{
+        body: {
+          maxHeight: 'calc(100vh - 200px)',
+          overflowY: 'auto'
+        }
+      }}
     >
       <Form
         form={form}
