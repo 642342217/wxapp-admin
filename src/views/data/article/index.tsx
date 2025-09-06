@@ -341,8 +341,7 @@ const ArticleManagement: FC = () => {
           name: values.name,
           companyId: Number(values.companyId),
           categoryId: Number(values.categoryId),
-          icon: values.icon,
-          content: values.content
+          icon: values.icon
         })
         message.success('编辑文章成功')
         setEditModalVisible(false)
