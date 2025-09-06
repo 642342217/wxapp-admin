@@ -15,11 +15,12 @@ import {
   Switch,
   Image,
   InputNumber,
-  Tooltip
+  Tooltip,
+  Upload
 } from 'antd'
-import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, MinusOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
+import { ExclamationCircleOutlined, PlusOutlined, SearchOutlined, MinusOutlined, EditOutlined, EyeOutlined, UploadOutlined } from '@ant-design/icons'
 import { PageWrapper } from '@/components/Page'
-import { getArticleList, updateArticleStatus, addArticle, updateArticle, updateArticleSort, updateArticleContent } from '@/api'
+import { getArticleList, addArticle, updateArticle, deleteArticle, updateArticleStatus, updateArticleContent, uploadDocument, uploadAudio, uploadPdf, uploadImage } from '@/api'
 import type { ArticleDataType, ArticlePageParams, ArticlePageResult } from './types'
 import RichTextEditor from '@/components/RichTextEditor'
 import { renderContent, getContentPreview } from '@/utils/contentRenderer'
@@ -315,7 +316,9 @@ const ArticleManagement: FC = () => {
           companyId: Number(values.companyId),
           categoryId: Number(values.categoryId),
           icon: values.icon,
-          content: values.content
+          pdfFile: values.pdfFile || '',
+          wordFile: values.wordFile || '',
+          mp3File: values.mp3File || ''
         })
         message.success('新增文章成功')
         setAddModalVisible(false)
@@ -329,7 +332,10 @@ const ArticleManagement: FC = () => {
           name: values.name,
           companyId: Number(values.companyId),
           categoryId: Number(values.categoryId),
-          icon: values.icon
+          icon: values.icon,
+          pdfFile: values.pdfFile || '',
+          wordFile: values.wordFile || '',
+          mp3File: values.mp3File || ''
         })
         message.success('编辑文章成功')
         setEditModalVisible(false)
@@ -449,22 +455,117 @@ const ArticleManagement: FC = () => {
           </Form.Item>
           <Form.Item
             name="icon"
-            label="图标链接"
+            label="图标上传"
             rules={[
-              { required: true, message: '请输入图标链接' },
-              { type: 'url', message: '请输入正确的URL格式' }
+              { required: true, message: '请上传图标' }
             ]}
           >
-            <Input placeholder="请输入图标链接" />
+            <Upload
+              accept="image/*"
+              maxCount={1}
+              beforeUpload={async (file) => {
+                try {
+                  const result = await uploadImage(file)
+                  editForm.setFieldsValue({ icon: result.url })
+                  message.success('图标上传成功')
+                } catch (error) {
+                  message.error('图标上传失败')
+                }
+                return false
+              }}
+              onRemove={() => {
+                editForm.setFieldsValue({ icon: '' })
+              }}
+            >
+              <Button icon={<UploadOutlined />}>选择图标</Button>
+            </Upload>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+              支持上传图片格式
+            </div>
           </Form.Item>
+
           <Form.Item
-            name="content"
-            label="文章内容"
-            rules={[
-              { required: true, message: '请输入文章内容' }
-            ]}
+            name="pdfFile"
+            label="PDF文件上传"
           >
-            <Input.TextArea rows={6} placeholder="请输入文章内容" />
+            <Upload
+              accept=".pdf"
+              maxCount={1}
+              beforeUpload={async (file) => {
+                try {
+                  const result = await uploadPdf(file)
+                  editForm.setFieldsValue({ pdfFile: result.url })
+                  message.success('PDF文件上传成功')
+                } catch (error) {
+                  message.error('PDF文件上传失败')
+                }
+                return false
+              }}
+              onRemove={() => {
+                editForm.setFieldsValue({ pdfFile: '' })
+              }}
+            >
+              <Button icon={<UploadOutlined />}>选择PDF文件</Button>
+            </Upload>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+              支持上传PDF文档
+            </div>
+          </Form.Item>
+
+          <Form.Item
+            name="wordFile"
+            label="Word文档上传"
+          >
+            <Upload
+              accept=".doc,.docx"
+              maxCount={1}
+              beforeUpload={async (file) => {
+                try {
+                  const result = await uploadDocument(file)
+                  editForm.setFieldsValue({ wordFile: result.url })
+                  message.success('Word文档上传成功')
+                } catch (error) {
+                  message.error('Word文档上传失败')
+                }
+                return false
+              }}
+              onRemove={() => {
+                editForm.setFieldsValue({ wordFile: '' })
+              }}
+            >
+              <Button icon={<UploadOutlined />}>选择Word文档</Button>
+            </Upload>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+              支持上传Word文档(.doc/.docx)
+            </div>
+          </Form.Item>
+
+          <Form.Item
+            name="mp3File"
+            label="MP3音频上传"
+          >
+            <Upload
+              accept=".mp3,audio/*"
+              maxCount={1}
+              beforeUpload={async (file) => {
+                try {
+                  const result = await uploadAudio(file)
+                  editForm.setFieldsValue({ mp3File: result.url })
+                  message.success('MP3音频上传成功')
+                } catch (error) {
+                  message.error('MP3音频上传失败')
+                }
+                return false
+              }}
+              onRemove={() => {
+                editForm.setFieldsValue({ mp3File: '' })
+              }}
+            >
+              <Button icon={<UploadOutlined />}>选择MP3音频</Button>
+            </Upload>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+              支持上传MP3音频文件
+            </div>
           </Form.Item>
         </Form>
       </Modal>
@@ -512,22 +613,117 @@ const ArticleManagement: FC = () => {
           </Form.Item>
           <Form.Item
             name="icon"
-            label="图标链接"
+            label="图标上传"
             rules={[
-              { required: true, message: '请输入图标链接' },
-              { type: 'url', message: '请输入正确的URL格式' }
+              { required: true, message: '请上传图标' }
             ]}
           >
-            <Input placeholder="请输入图标链接" />
+            <Upload
+              accept="image/*"
+              maxCount={1}
+              beforeUpload={async (file) => {
+                try {
+                  const result = await uploadImage(file)
+                  editForm.setFieldsValue({ icon: result.url })
+                  message.success('图标上传成功')
+                } catch (error) {
+                  message.error('图标上传失败')
+                }
+                return false
+              }}
+              onRemove={() => {
+                editForm.setFieldsValue({ icon: '' })
+              }}
+            >
+              <Button icon={<UploadOutlined />}>选择图标</Button>
+            </Upload>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+              支持上传图片格式
+            </div>
           </Form.Item>
+
           <Form.Item
-            name="content"
-            label="文章内容"
-            rules={[
-              { required: true, message: '请输入文章内容' }
-            ]}
+            name="pdfFile"
+            label="PDF文件上传"
           >
-            <Input.TextArea rows={6} placeholder="请输入文章内容" />
+            <Upload
+              accept=".pdf"
+              maxCount={1}
+              beforeUpload={async (file) => {
+                try {
+                  const result = await uploadPdf(file)
+                  editForm.setFieldsValue({ pdfFile: result.url })
+                  message.success('PDF文件上传成功')
+                } catch (error) {
+                  message.error('PDF文件上传失败')
+                }
+                return false
+              }}
+              onRemove={() => {
+                editForm.setFieldsValue({ pdfFile: '' })
+              }}
+            >
+              <Button icon={<UploadOutlined />}>选择PDF文件</Button>
+            </Upload>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+              支持上传PDF文档
+            </div>
+          </Form.Item>
+
+          <Form.Item
+            name="wordFile"
+            label="Word文档上传"
+          >
+            <Upload
+              accept=".doc,.docx"
+              maxCount={1}
+              beforeUpload={async (file) => {
+                try {
+                  const result = await uploadDocument(file)
+                  editForm.setFieldsValue({ wordFile: result.url })
+                  message.success('Word文档上传成功')
+                } catch (error) {
+                  message.error('Word文档上传失败')
+                }
+                return false
+              }}
+              onRemove={() => {
+                editForm.setFieldsValue({ wordFile: '' })
+              }}
+            >
+              <Button icon={<UploadOutlined />}>选择Word文档</Button>
+            </Upload>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+              支持上传Word文档(.doc/.docx)
+            </div>
+          </Form.Item>
+
+          <Form.Item
+            name="mp3File"
+            label="MP3音频上传"
+          >
+            <Upload
+              accept=".mp3,audio/*"
+              maxCount={1}
+              beforeUpload={async (file) => {
+                try {
+                  const result = await uploadAudio(file)
+                  editForm.setFieldsValue({ mp3File: result.url })
+                  message.success('MP3音频上传成功')
+                } catch (error) {
+                  message.error('MP3音频上传失败')
+                }
+                return false
+              }}
+              onRemove={() => {
+                editForm.setFieldsValue({ mp3File: '' })
+              }}
+            >
+              <Button icon={<UploadOutlined />}>选择MP3音频</Button>
+            </Upload>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+              支持上传MP3音频文件
+            </div>
           </Form.Item>
         </Form>
       </Modal>

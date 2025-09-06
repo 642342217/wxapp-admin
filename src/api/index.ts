@@ -348,3 +348,11 @@ export function uploadVideo(file: File): Promise<{ url: string }> {
 export function uploadPdf(file: File): Promise<{ url: string }> {
   return uploadFile(file)
 }
+
+export function uploadDocument(file: File): Promise<{ url: string }> {
+  return uploadFile(file)
+}
+
+export function uploadAudio(file: File): Promise<{ url: string }> {
+  return uploadFile(file)
+}
