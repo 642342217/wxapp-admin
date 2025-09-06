@@ -22,6 +22,7 @@ import { PageWrapper } from '@/components/Page'
 import { getArticleList, updateArticleStatus, addArticle, updateArticle, updateArticleSort, updateArticleContent } from '@/api'
 import type { ArticleDataType, ArticlePageParams, ArticlePageResult } from './types'
 import RichTextEditor from '@/components/RichTextEditor'
+import { renderContent, getContentPreview } from '@/utils/contentRenderer'
 
 const ArticleManagement: FC = () => {
   const navigate = useNavigate()
@@ -88,25 +89,37 @@ const ArticleManagement: FC = () => {
       title: '内容',
       dataIndex: 'content',
       align: 'center',
-      width: 150,
+      width: 200,
       render: (content: string, record: ArticleDataType) => (
-        <Space>
-          <Tooltip title="编辑内容">
-            <Button
-              size="small"
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => handleEditContent(record)}
-            />
-          </Tooltip>
-          <Tooltip title="预览内容">
-            <Button
-              size="small"
-              type="text"
-              icon={<EyeOutlined />}
-              onClick={() => handlePreviewContent(record)}
-            />
-          </Tooltip>
+        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+          <div style={{
+            fontSize: '12px',
+            color: '#666',
+            maxWidth: '150px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
+            {getContentPreview(content, 30)}
+          </div>
+          <Space>
+            <Tooltip title="编辑内容">
+              <Button
+                size="small"
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => handleEditContent(record)}
+              />
+            </Tooltip>
+            <Tooltip title="预览内容">
+              <Button
+                size="small"
+                type="text"
+                icon={<EyeOutlined />}
+                onClick={() => handlePreviewContent(record)}
+              />
+            </Tooltip>
+          </Space>
         </Space>
       )
     },
@@ -565,7 +578,7 @@ const ArticleManagement: FC = () => {
       >
         <div style={{ maxHeight: '600px', overflow: 'auto', padding: '16px', border: '1px solid #d9d9d9', borderRadius: '6px', backgroundColor: '#fff' }}>
           <div
-            dangerouslySetInnerHTML={{ __html: currentContent }}
+            dangerouslySetInnerHTML={{ __html: renderContent(currentContent) }}
             style={{
               lineHeight: '1.6',
               fontSize: '14px',

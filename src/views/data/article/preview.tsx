@@ -3,6 +3,7 @@ import { Card, Button, Select, message, Spin } from 'antd'
 import { ArrowLeftOutlined, MobileOutlined, DesktopOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { getArticleList } from '@/api'
+import { renderContent } from '@/utils/contentRenderer'
 import type { ArticleDataType } from './types'
 
 const ArticlePreview: FC = () => {
@@ -36,14 +37,14 @@ const ArticlePreview: FC = () => {
     setSelectedArticle(article || null)
   }
 
-  const renderContent = (content: string) => {
+  const renderContentHtml = (content: string) => {
     if (!content) {
       return <div style={{ textAlign: 'center', color: '#999', padding: '40px' }}>暂无内容</div>
     }
 
     return (
       <div
-        dangerouslySetInnerHTML={{ __html: content }}
+        dangerouslySetInnerHTML={{ __html: renderContent(content) }}
         style={{
           lineHeight: '1.8',
           fontSize: viewMode === 'mobile' ? '16px' : '14px',
@@ -151,7 +152,7 @@ const ArticlePreview: FC = () => {
                 <Spin size="large" />
               </div>
             ) : selectedArticle ? (
-              renderContent(selectedArticle.content)
+              renderContentHtml(selectedArticle.content)
             ) : (
               <div style={{ textAlign: 'center', color: '#999', padding: '40px' }}>
                 请选择要预览的文章

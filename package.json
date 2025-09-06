@@ -28,6 +28,7 @@
     "@uiw/react-codemirror": "^4.21.20",
     "@uiw/react-md-editor": "^3.25.6",
     "@wangeditor/editor": "^5.1.23",
+    "@wangeditor/editor-for-react": "^1.0.6",
     "ahooks": "^3.7.8",
     "antd": "^5.11.2",
     "axios": "^1.6.2",
