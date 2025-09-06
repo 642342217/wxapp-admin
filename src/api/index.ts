@@ -276,3 +276,44 @@ export function updateCategorySort(data: { id: number; sort: number }): Promise<
     data
   })
 }
+
+// Article management APIs
+export function getArticleList(params: any): Promise<any> {
+  return service({
+    url: '/admin/company/article/page',
+    method: 'post',
+    data: params
+  })
+}
+
+export function addArticle(data: any): Promise<any> {
+  return service({
+    url: '/admin/company/article/add',
+    method: 'post',
+    data
+  })
+}
+
+export function updateArticle(data: any): Promise<any> {
+  return service({
+    url: '/admin/company/article/edit',
+    method: 'post',
+    data
+  })
+}
+
+export function updateArticleStatus(data: { id: number; status: number }): Promise<any> {
+  return service({
+    url: '/admin/company/article/status',
+    method: 'post',
+    data
+  })
+}
+
+export function updateArticleSort(data: { id: number; sort: number }): Promise<any> {
+  return service({
+    url: '/admin/company/article/sort',
+    method: 'post',
+    data
+  })
+}

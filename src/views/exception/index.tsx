@@ -1,54 +1,73 @@
-import type { FC, ReactNode } from 'react'
-import { Result, Card, Button } from 'antd'
+import { FC } from 'react'
+import { Result, Button } from 'antd'
 import { useNavigate, useLoaderData } from 'react-router-dom'
 import { ExceptionEnum } from '@/enums/exceptionEnum'
-import { PageWrapper } from '@/components/Page'
-import { RESULT_COMPO } from '@/settings/websiteSetting'
 
-const subTitleMap = new Map([
-  [ExceptionEnum.PAGE_NOT_ACCESS, '对不起，您没有权限访问此页面。'],
-  [ExceptionEnum.PAGE_NOT_FOUND, '对不起，您访问的页面不存在。'],
-  [ExceptionEnum.SERVER_ERROR, '对不起，服务器发生错误。']
-])
+interface ExceptionData {
+  status: ExceptionEnum
+  withCard?: boolean
+}
 
 const PageException: FC = () => {
   const navigate = useNavigate()
+  const data = useLoaderData() as ExceptionData
+  const { status, withCard = true } = data || {}
 
-  const { status, withCard } = useLoaderData() as { status: any; withCard: boolean }
-
-  const goHome = () => {
-    navigate('/home')
-  }
-
-  const WithCard = ({ children }: { children: ReactNode }) => {
-    if (withCard) {
-      return (
-        <PageWrapper plugin={RESULT_COMPO}>
-          <Card bordered={false}>{children}</Card>
-        </PageWrapper>
-      )
-    } else {
-      return (
-        <div className='flex-center' style={{ height: '100vh' }}>
-          {children}
-        </div>
-      )
+  const getExceptionConfig = (status: ExceptionEnum) => {
+    switch (status) {
+      case ExceptionEnum.PAGE_NOT_ACCESS:
+        return {
+          status: '403' as const,
+          title: '403',
+          subTitle: '抱歉，您无权访问此页面',
+        }
+      case ExceptionEnum.PAGE_NOT_FOUND:
+        return {
+          status: '404' as const,
+          title: '404',
+          subTitle: '抱歉，您访问的页面不存在',
+        }
+      default:
+        return {
+          status: '500' as const,
+          title: '500',
+          subTitle: '抱歉，服务器出现错误',
+        }
     }
   }
 
+  const config = getExceptionConfig(status)
+
+  const handleBackHome = () => {
+    navigate('/')
+  }
+
+  const handleGoBack = () => {
+    navigate(-1)
+  }
+
   return (
-    <WithCard>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: withCard ? 'auto' : '100vh',
+      padding: withCard ? '20px' : '0'
+    }}>
       <Result
-        status={status}
-        title={status}
-        subTitle={subTitleMap.get(status)}
-        extra={
-          <Button type='primary' onClick={goHome}>
+        status={config.status}
+        title={config.title}
+        subTitle={config.subTitle}
+        extra={[
+          <Button type="primary" key="home" onClick={handleBackHome}>
             返回首页
+          </Button>,
+          <Button key="back" onClick={handleGoBack}>
+            返回上页
           </Button>
-        }
+        ]}
       />
-    </WithCard>
+    </div>
   )
 }
 
